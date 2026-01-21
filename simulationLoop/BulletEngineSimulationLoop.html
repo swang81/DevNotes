@@ -14,8 +14,8 @@
 
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
-        <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/variables-af99728e.css">
+        <link rel="stylesheet" href="../css/general-5a2affe6.css">
         <link rel="stylesheet" href="../css/chrome-ae938929.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
@@ -23,7 +23,7 @@
         <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-dd8e6b8c.css">
         <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
         <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
 
@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-f6b6a3ef.js";
+            window.path_to_searchindex_js = "../searchindex-9ab0a0ee.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-d332d9ff.js"></script>
+        <script src="../toc-71bd4c3d.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -193,8 +193,146 @@ protected:
 }
 </code></pre>
 <h2 id="stepsimulation函数"><a class="header" href="#stepsimulation函数">StepSimulation函数</a></h2>
-<p>bullet的每帧模拟的函数是</p>
-<pre><code class="language-cpp">
+<p>bullet的StepSimulation函数是</p>
+<pre><code class="language-cpp">// timeStep: 本帧真实流逝时间（来自游戏主循环）。
+// maxSubSteps: 单帧内允许执行的“最大物理子步数”.
+// fixedTimeStep: 单次物理 step 的固定 dt
+int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep)
+</code></pre>
+<p>在这个函数中，存在两种时间推进模式，两种的模式的启用条件是：<code>maxSubSteps</code>的数值。</p>
+<ul>
+<li>固定时间步进（Fixed Timestep）。启用条件：<code>maxSubSteps &gt;0</code>，物理使用固定步长（如1/60s）。数值稳定，适合游戏和实时仿真。</li>
+<li>可变时间步长(Variable Timestep)。启用条件<code>maxSubSteps ==0</code>，使用可变的时间步模式。每帧只跑一次物理。不推荐使用。</li>
+</ul>
+<pre><code class="language-cpp">int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep)
+{
+	startProfiling(timeStep);
+	
+	int numSimulationSubSteps = 0; // 本帧应执行的物理 step 次数
+
+	if (maxSubSteps)
+	{	
+		//固定时间步
+		//fixed timestep with interpolation
+		m_fixedTimeStep = fixedTimeStep;
+		//m_localTime:尚未被物理消耗的时间
+		m_localTime += timeStep;
+		if (m_localTime &gt;= fixedTimeStep)
+		{
+			numSimulationSubSteps = int(m_localTime / fixedTimeStep);
+			m_localTime -= numSimulationSubSteps * fixedTimeStep;
+		}
+	}
+	else
+	{
+		//可变时间步模式
+		//variable timestep
+		fixedTimeStep = timeStep;
+		m_localTime = m_latencyMotionStateInterpolation ? 0 : timeStep;
+		m_fixedTimeStep = 0;
+		if (btFuzzyZero(timeStep))
+		{
+			numSimulationSubSteps = 0;
+			maxSubSteps = 0;
+		}
+		else
+		{
+			numSimulationSubSteps = 1;
+			maxSubSteps = 1;
+		}
+	}
+	
+	//process some debugging flags
+	if (getDebugDrawer())
+	{
+		btIDebugDraw* debugDrawer = getDebugDrawer();
+		gDisableDeactivation = (debugDrawer-&gt;getDebugMode() &amp; btIDebugDraw::DBG_NoDeactivation) != 0;
+	}
+	if (numSimulationSubSteps)
+	{
+		//clamp the number of substeps, to prevent simulation grinding spiralling down to a halt
+		int clampedSimulationSteps = (numSimulationSubSteps &gt; maxSubSteps) ? maxSubSteps : numSimulationSubSteps;
+		//保存上一帧状态
+		saveKinematicState(fixedTimeStep * clampedSimulationSteps);
+		//应用重力
+		applyGravity();
+
+		for (int i = 0; i &lt; clampedSimulationSteps; i++)
+		{
+			//物理单步模拟
+			internalSingleStepSimulation(fixedTimeStep);
+			synchronizeMotionStates();
+		}
+	}
+	else
+	{
+		synchronizeMotionStates();
+	}
+	// 清理力
+	clearForces();
+
+#ifndef BT_NO_PROFILE
+	CProfileManager::Increment_Frame_Counter();
+#endif  //BT_NO_PROFILE
+
+	return numSimulationSubSteps;
+}
+
+</code></pre>
+<h2 id="internalsinglestepsimulation"><a class="header" href="#internalsinglestepsimulation">internalSingleStepSimulation</a></h2>
+<pre><code class="language-cpp">void btDiscreteDynamicsWorld::internalSingleStepSimulation(btScalar timeStep)
+{
+	BT_PROFILE("internalSingleStepSimulation");
+
+	if (0 != m_internalPreTickCallback)
+	{
+		(*m_internalPreTickCallback)(this, timeStep);
+	}
+
+	///apply gravity, predict motion
+	// 1. 预测物无约束的运动
+	predictUnconstraintMotion(timeStep);
+
+	btDispatcherInfo&amp; dispatchInfo = getDispatchInfo();
+
+	dispatchInfo.m_timeStep = timeStep;
+	dispatchInfo.m_stepCount = 0;
+	dispatchInfo.m_debugDraw = getDebugDrawer();
+
+	createPredictiveContacts(timeStep);
+
+	///perform collision detection
+	// 2. 碰撞检测
+	performDiscreteCollisionDetection();
+	// 3. 计算模拟岛
+	calculateSimulationIslands();
+
+	getSolverInfo().m_timeStep = timeStep;
+
+	///solve contact and other joint constraints
+	// 4. 约束求解
+	solveConstraints(getSolverInfo());
+
+	///CallbackTriggers();
+
+	///integrate transforms
+	// 5. 积分变换
+	integrateTransforms(timeStep);
+
+	///update vehicle simulation
+	// 6. 更新自定义行为
+	updateActions(timeStep);
+
+	// 7. 更新激活状态
+	updateActivationState(timeStep);
+
+	// 8. 系统回调
+	if (0 != m_internalTickCallback)
+	{
+		(*m_internalTickCallback)(this, timeStep);
+	}
+}
+
 </code></pre>
 
                     </main>
@@ -205,7 +343,7 @@ protected:
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../appendix/referencesBooks.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../collision/IntroCollision.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -219,7 +357,7 @@ protected:
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../appendix/referencesBooks.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../collision/IntroCollision.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

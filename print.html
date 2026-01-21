@@ -15,8 +15,8 @@
 
         <link rel="icon" href="favicon-de23e50b.svg">
         <link rel="shortcut icon" href="favicon-8114d1fc.png">
-        <link rel="stylesheet" href="css/variables-8adf115d.css">
-        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/variables-af99728e.css">
+        <link rel="stylesheet" href="css/general-5a2affe6.css">
         <link rel="stylesheet" href="css/chrome-ae938929.css">
         <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
 
@@ -24,7 +24,7 @@
         <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-dd8e6b8c.css">
         <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
         <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
 
@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-f6b6a3ef.js";
+            window.path_to_searchindex_js = "searchindex-9ab0a0ee.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-d332d9ff.js"></script>
+        <script src="toc-71bd4c3d.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -179,15 +179,9 @@
 <h1 id="简介"><a class="header" href="#简介">简介</a></h1>
 <p>《Game Physics and Development Notes》是一份围绕游戏物理与游戏开发实践的长期笔记，记录了从物理建模到工程实现，再到实际游戏应用过程中的关键思考与取舍。</p>
 <p>本笔记面向具备一定技术背景、希望深入理解“游戏物理为什么这样实现“的开发者，强调原理、工程经验与实际问题之间的联系，而非公式堆砌或 API 使用说明。</p>
-<p>作者：小杰克<br>个人主页：<a href="https://swang81.github.io/">https://swang81.github.io/</a></p>
-<ul>
-<li>
-<p>📘 在线阅读（GitHub Pages）：<br><a href="https://swang81.github.io/GamePhysicsNotes/">GamePhysicsNotes</a></p>
-</li>
-<li>
-<p>💻 GitHub 仓库：<br><a href="https://github.com/swang81/GamePhysicsNotes">swang81/GamePhysicsNotes</a></p>
-</li>
-</ul>
+<p>个人主页：<a href="https://swang81.github.io/">https://swang81.github.io/</a></p>
+<p>在线阅读（GitHub Pages）：<a href="https://swang81.github.io/DevNotes/">GamePhysicsNotes</a></p>
+<p>作者：小杰克</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="物理引擎技术"><a href="#物理引擎技术" class="header">物理引擎技术</a></h1>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
@@ -343,6 +337,36 @@
 <h3 id="对比关于game-physics-in-one-weekend"><a class="header" href="#对比关于game-physics-in-one-weekend">对比关于《Game Physics in One Weekend》</a></h3>
 <p>在《Game Physics in One Weekend》的代码实现中，你会发现分子没有负号。这是因为该书将法线定义为“从 A 指向 B”，且在应用冲量时手动反转了符号。
 <strong>建议</strong>：在实际工程中，务必采用上述标准推导。标准推导保证了只要物体在靠近（点积为负），算出的 <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.854em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05724em;">j</span></span></span></span> 就一定是正数，这符合物理直觉，也方便后续处理摩擦力不等式约束。</p>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="积分方法"><a class="header" href="#积分方法">积分方法</a></h1>
+<p>在游戏物理引擎中，积分方法用于将连续的力学方程离散化，是物体每个时间步内更新位置和速度。根据模拟的稳定性、精度和性能，选择不同的积分方法。</p>
+<h2 id="显式欧拉"><a class="header" href="#显式欧拉">显式欧拉</a></h2>
+<p>显式欧拉（Explicit Euler）是最基础的积分方法，其核心思想是用当前的速度和加速度直接预测下一帧的位置和速度。公式如下：
+<span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5944em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5944em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span>
+其中，<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4444em;"></span><span class="mord mathbf" style="margin-right:0.01597em;">v</span></span></span></span>是速度，<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4444em;"></span><span class="mord mathbf">x</span></span></span></span>是位置，<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.4444em;"></span><span class="mord mathbf">a</span></span></span></span>是加速度，<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal">t</span></span></span></span>是时间步长。</p>
+<p>这种方法计算简单，开销低。当时间步长过大或者系统刚体较强时，容易出现不稳定，导致能量发散或者物体穿透。</p>
+<h2 id="隐式欧拉"><a class="header" href="#隐式欧拉">隐式欧拉</a></h2>
+<p>隐式欧拉（Implicit / Backward Euler）与显式欧拉不同，它使用下一帧未知状态的加速度进行积分，从而提高数值稳定性。公式如下：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>稳定性高，即使大时间步也不会发散。可以处理刚性系统，例如柔体、流体和复杂约束。计算量相对较大，需要求解线性方程组。在游戏物理引擎中，主要用柔体和流体模拟。刚体不用隐式欧拉，通常用西面半隐式欧拉方法，兼顾稳定性和性能。</p>
+<h2 id="半隐式欧拉"><a class="header" href="#半隐式欧拉">半隐式欧拉</a></h2>
+<p>半隐式欧拉（Semi-implicit / Symplectic Euler）结合了显式和隐式的特点，是游戏物理中最常用的方法之一。</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.5944em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord">Δ</span><span class="mord mathnormal">t</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">⋅</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>与隐式欧拉区别是，位置更新使用的是更新后的速度，而不是当前速度。相比显式欧拉更稳定，能量不易发散。计算量低，实时性能好，广泛用在刚体模拟、角色控制器、布料约束等。几乎所有主流游戏引擎的刚体子系统（包括 Bullet、Unity、Unreal）都使用半隐式欧拉作为默认的积分方法。</p>
+<h2 id="verlet积分"><a class="header" href="#verlet积分">Verlet积分</a></h2>
+<p>Verlet 积分是基于位置的积分方法，不直接使用速度，而是利用当前和上一帧的位置及加速度更新下一帧位置。核心公式：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7944em;vertical-align:-0.15em;"></span><span class="mord">2</span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.7917em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.0141em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">a</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord">Δ</span><span class="mord"><span class="mord mathnormal">t</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8641em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>速度通过差分近似得到：
+<span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5944em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf" style="margin-right:0.01597em;">v</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.2806em;"><span style="top:-2.55em;margin-left:-0.016em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.9463em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.2603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord mathnormal">t</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+<p>在物理引擎中，常用于粒子系统、布料模拟和柔体系统，适合PBD使用。</p>
+<h2 id="runge-kutta积分"><a class="header" href="#runge-kutta积分">Runge-Kutta积分</a></h2>
+<p>Runge-Kutta 积分是一类高阶积分方法，通过多次估计加速度来提高数值精度。最常用的是二阶（RK2）和四阶（RK4）方法。
+例如 RK4 方法：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0463em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">6</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord mathnormal">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord">2</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord">2</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></p>
+<p>其中<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>是对不同时间点加速度的加权估计。精度高，震荡小。适合刚体、粒子系统、流体的精确模拟。计算量大，实时性能低。在物理引擎中，游戏中实时刚体很少使用，但在布料或粒子模拟的高精度子系统中可能用到。</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="第2章-物理模拟循环"><a href="#第2章-物理模拟循环" class="header">第2章 物理模拟循环</a></h1>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
@@ -425,12 +449,268 @@ protected:
 }
 </code></pre>
 <h2 id="stepsimulation函数"><a class="header" href="#stepsimulation函数">StepSimulation函数</a></h2>
-<p>bullet的每帧模拟的函数是</p>
-<pre><code class="language-cpp">
+<p>bullet的StepSimulation函数是</p>
+<pre><code class="language-cpp">// timeStep: 本帧真实流逝时间（来自游戏主循环）。
+// maxSubSteps: 单帧内允许执行的“最大物理子步数”.
+// fixedTimeStep: 单次物理 step 的固定 dt
+int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep)
 </code></pre>
+<p>在这个函数中，存在两种时间推进模式，两种的模式的启用条件是：<code>maxSubSteps</code>的数值。</p>
+<ul>
+<li>固定时间步进（Fixed Timestep）。启用条件：<code>maxSubSteps &gt;0</code>，物理使用固定步长（如1/60s）。数值稳定，适合游戏和实时仿真。</li>
+<li>可变时间步长(Variable Timestep)。启用条件<code>maxSubSteps ==0</code>，使用可变的时间步模式。每帧只跑一次物理。不推荐使用。</li>
+</ul>
+<pre><code class="language-cpp">int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, btScalar fixedTimeStep)
+{
+	startProfiling(timeStep);
+	
+	int numSimulationSubSteps = 0; // 本帧应执行的物理 step 次数
+
+	if (maxSubSteps)
+	{	
+		//固定时间步
+		//fixed timestep with interpolation
+		m_fixedTimeStep = fixedTimeStep;
+		//m_localTime:尚未被物理消耗的时间
+		m_localTime += timeStep;
+		if (m_localTime &gt;= fixedTimeStep)
+		{
+			numSimulationSubSteps = int(m_localTime / fixedTimeStep);
+			m_localTime -= numSimulationSubSteps * fixedTimeStep;
+		}
+	}
+	else
+	{
+		//可变时间步模式
+		//variable timestep
+		fixedTimeStep = timeStep;
+		m_localTime = m_latencyMotionStateInterpolation ? 0 : timeStep;
+		m_fixedTimeStep = 0;
+		if (btFuzzyZero(timeStep))
+		{
+			numSimulationSubSteps = 0;
+			maxSubSteps = 0;
+		}
+		else
+		{
+			numSimulationSubSteps = 1;
+			maxSubSteps = 1;
+		}
+	}
+	
+	//process some debugging flags
+	if (getDebugDrawer())
+	{
+		btIDebugDraw* debugDrawer = getDebugDrawer();
+		gDisableDeactivation = (debugDrawer-&gt;getDebugMode() &amp; btIDebugDraw::DBG_NoDeactivation) != 0;
+	}
+	if (numSimulationSubSteps)
+	{
+		//clamp the number of substeps, to prevent simulation grinding spiralling down to a halt
+		int clampedSimulationSteps = (numSimulationSubSteps &gt; maxSubSteps) ? maxSubSteps : numSimulationSubSteps;
+		//保存上一帧状态
+		saveKinematicState(fixedTimeStep * clampedSimulationSteps);
+		//应用重力
+		applyGravity();
+
+		for (int i = 0; i &lt; clampedSimulationSteps; i++)
+		{
+			//物理单步模拟
+			internalSingleStepSimulation(fixedTimeStep);
+			synchronizeMotionStates();
+		}
+	}
+	else
+	{
+		synchronizeMotionStates();
+	}
+	// 清理力
+	clearForces();
+
+#ifndef BT_NO_PROFILE
+	CProfileManager::Increment_Frame_Counter();
+#endif  //BT_NO_PROFILE
+
+	return numSimulationSubSteps;
+}
+
+</code></pre>
+<h2 id="internalsinglestepsimulation"><a class="header" href="#internalsinglestepsimulation">internalSingleStepSimulation</a></h2>
+<pre><code class="language-cpp">void btDiscreteDynamicsWorld::internalSingleStepSimulation(btScalar timeStep)
+{
+	BT_PROFILE("internalSingleStepSimulation");
+
+	if (0 != m_internalPreTickCallback)
+	{
+		(*m_internalPreTickCallback)(this, timeStep);
+	}
+
+	///apply gravity, predict motion
+	// 1. 预测物无约束的运动
+	predictUnconstraintMotion(timeStep);
+
+	btDispatcherInfo&amp; dispatchInfo = getDispatchInfo();
+
+	dispatchInfo.m_timeStep = timeStep;
+	dispatchInfo.m_stepCount = 0;
+	dispatchInfo.m_debugDraw = getDebugDrawer();
+
+	createPredictiveContacts(timeStep);
+
+	///perform collision detection
+	// 2. 碰撞检测
+	performDiscreteCollisionDetection();
+	// 3. 计算模拟岛
+	calculateSimulationIslands();
+
+	getSolverInfo().m_timeStep = timeStep;
+
+	///solve contact and other joint constraints
+	// 4. 约束求解
+	solveConstraints(getSolverInfo());
+
+	///CallbackTriggers();
+
+	///integrate transforms
+	// 5. 积分变换
+	integrateTransforms(timeStep);
+
+	///update vehicle simulation
+	// 6. 更新自定义行为
+	updateActions(timeStep);
+
+	// 7. 更新激活状态
+	updateActivationState(timeStep);
+
+	// 8. 系统回调
+	if (0 != m_internalTickCallback)
+	{
+		(*m_internalTickCallback)(this, timeStep);
+	}
+}
+
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="碰撞检测"><a class="header" href="#碰撞检测">碰撞检测</a></h1>
+<p>碰撞检测主要解决的问题是：场景中的哪些物体在何时、何地、以何种方式发生了接触？</p>
+<p>想象一下：在一个包含N个物体的场景中，潜在的碰撞对有 <code>N*(N-1)/2</code> 个，即 <code>O(N²)</code> 的复杂度。对于一个拥有数千个物体的现代游戏场景，每秒进行60次这样的暴力检查是完全不可行的。</p>
+<p>本章将介绍现代物理引擎如何通过一个多阶段的碰撞检测管线（Collision Detection Pipeline）来智能地解决这个问题。</p>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="宽相和窄相检测"><a class="header" href="#宽相和窄相检测">宽相和窄相检测</a></h1>
+<p>为了将 <code>O(N²)</code> 的复杂度降低到可控范围，碰撞检测系统通常被设计为一个漏斗状的过滤管线，分为两个主要阶段：</p>
+<ul>
+<li>
+<p><strong>宽相（Broad Phase）</strong>：此阶段的目标是使用非常快速但可能不精确的方法，大规模地剔除那些“绝对不可能”发生碰撞的物体对。它就像一个粗略的筛子，允许一些“误报”（False Positives，即报告可能碰撞但实际没有），但绝不允许“漏报”（False Negatives）。其输出是一个“潜在碰撞对”列表。</p>
+</li>
+<li>
+<p><strong>窄相（Narrow Phase）</strong>：此阶段接收宽相的输出，并对每一个潜在碰撞对进行精确的、基于其真实几何形状的相交测试。这是一个计算成本较高的过程，但只针对少数物体对执行。它的任务是最终确认碰撞是否发生，如果发生，则计算出碰撞的详细信息，即<strong>接触流形（Contact Manifold）</strong>，通常包括接触点（Contact Point）、接触法线（Contact Normal）和穿透深度（Penetration Depth）。这些信息将传递给碰撞响应系统。</p>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="宽相检测"><a class="header" href="#宽相检测">宽相检测</a></h1>
+<h2 id="原理说明"><a class="header" href="#原理说明">原理说明</a></h2>
+<p>宽相碰撞检测目标是生成一个可能发生碰撞的“碰撞对列表”。所有宽相算法都基于一个简单的思想：用一个简单的、计算开销小的几何体（称为<strong>包围体</strong>）来包裹复杂的物体。如果两个物体的包围体没有重叠，那么这两个物体本身也一定没有重叠。</p>
+<p>最常用的包围体是<strong>轴对齐包围盒 (Axis-Aligned Bounding Box, AABB)</strong>。一个 AABB 可以由两个点（最小值点 <code>min</code> 和最大值点 <code>max</code>）来定义。检查两个 AABB 是否重叠非常快速，只需要在三个轴上分别检查它们的区间是否重叠即可。</p>
+<h2 id="常见宽相算法"><a class="header" href="#常见宽相算法">常见宽相算法</a></h2>
+<p>常见的宽相算法有下面几种：</p>
+<ul>
+<li>
+<p><strong>直接遍历</strong>
+直接两两检查所有物体的包围体是否重叠。复杂度为<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。当物体数量增多时，性能很差。所以，仅适合小规模场景或者教学示例。</p>
+</li>
+<li>
+<p><strong>网格法</strong>
+将整个世界空间划分为一系列均匀大小的单元格。每个单元格存储其中包含的物体列表。对于一个物体，只需检查它所在的单元格及其相邻单元格中的物体。如果物体分布不均匀，大量单元格是空的，浪费内存。一个物体可能跨越多个单元格，需要额外处理。单元格的大小对性能影响很大，过大和过小都不行。在工程上，会用Dynamic Spatial Hashing来实现存储和管理。</p>
+</li>
+<li>
+<p><strong>四叉树和八叉树</strong>
+递归地将空间划分为更小的子空间。四叉树用于 2D 空间，八叉树用于3D空间。当一个子空间中的物体数量超过阈值时，该子空间会被进一步细分,可以自定义一个叶子节点上最多几个物体。重叠测试流程：通过遍历树结构，检查那些与查询物体包围盒重叠的节点的物体。通过这种方法，可以很好的适应物体分布不均匀的场景，进行快速查询。如果一个物体跨越多个节点时，需要特殊处理，比如放在父节点或者子节点（需要去重）。</p>
+</li>
+<li>
+<p><strong>Sweep and Prune (SAP / Sort and Sweep)</strong></p>
+</li>
+</ul>
+<p>SAP 全称 Sweep and Prune（扫描与剪枝），也称 Sort and Sweep (SAS)。SAS 是算法思想，SAP 是其高效实现与优化版本。SAP 的核心思想是：</p>
+<ol>
+<li>每个物体用 AABB 包围，并在每个轴上有最小值（start）和最大值（end）；</li>
+<li>选择一个主轴（通常是 X 轴），将物体在该轴的端点排序；</li>
+<li>按排序顺序扫描端点，维护活动列表（Active List），生成在主轴上重叠的候选碰撞对；</li>
+<li>对候选对在其他轴（Y、Z）上做重叠检查（剪枝），只有在所有轴都重叠的情况下才将其保留为潜在碰撞对；</li>
+<li>候选对送到窄相检测阶段进行精确碰撞检测。</li>
+</ol>
+<p>核心原则：<strong>排序轴做大规模剪枝，其他轴做精细剪枝</strong>。这种方式可以大幅减少不必要的碰撞测试，同时保持增量更新高效。</p>
+<ul>
+<li><strong>Dynamic Bounding Volume Tree</strong>
+动态包围体树，简称DBVT。DBVT是一种二叉树结构，树的每个节点都存储一个AABB。树的叶子节点存储实际物体的AABB。父节点的AABB是两个叶子节点的包围盒。如果查询的AABB与某个节点AABB不重叠，就可以快速剪枝，跳过整个子树。树支持动态的更新，允许物体的移动、插入和删除。DBVT可以很好处理动态场景，又能处理稀疏和密集的物体分布。</li>
+</ul>
+<h2 id="主流物理引擎的宽相实践"><a class="header" href="#主流物理引擎的宽相实践">主流物理引擎的宽相实践</a></h2>
+<p>Box2D: 使用的DBVT算法.</p>
+<p>Bullet3: 提供了多种宽相检测算法。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Broadphase class</th><th>算法</th><th>时间复杂度</th><th>备注</th></tr>
+</thead>
+<tbody>
+<tr><td><code>btDbvtBroadphase</code></td><td>DBVT</td><td><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mord mathnormal">L</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></td><td>默认</td></tr>
+<tr><td><code>btAxisSweep3</code></td><td>SAP(16-bit)</td><td><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></td><td></td></tr>
+<tr><td><code>bt32BitAxisSweep3</code></td><td>SAP(32-bit)</td><td><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></td><td></td></tr>
+<tr><td><code>btSimpleBroadphase</code></td><td>暴力AABB</td><td><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></td><td>测试用</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Dynamic Spatial Hashing</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="窄相碰撞检测"><a class="header" href="#窄相碰撞检测">窄相碰撞检测</a></h1>
+<p>使用宽相检测可以输出哪两个物体的AABB包围盒重叠后，就可以使用窄相检测进行进一步相交测试。如果发生碰撞，窄相还需要计算出碰撞的详细信息，即接触信息 (Contact Information)，包括：接触点 (Contact Points)、接触法线 (Contact Normal)和穿透深度 (Penetration Depth)。这些信息是碰撞响应和约束求解的输入。</p>
+<p>在窄相碰撞检测时，根据两个物体形状，选择不同的检测算法。根据及算法可以分成三大类：</p>
+<h2 id="基于解析公式的专用几何体检测算法"><a class="header" href="#基于解析公式的专用几何体检测算法">基于解析公式的“专用几何体检测”算法</a></h2>
+<p>利用几何体的数学定义，直接通过公式进行计算：判断是否相交、求最近点和穿透深度。比如：Sphere-Sphere, sphere-plane, Capsule-Capsule,Ray-Primitive等。</p>
+<h2 id="sat分离轴定理"><a class="header" href="#sat分离轴定理">SAT（分离轴定理）</a></h2>
+<p>SAT算法，用于检测两个凸多面体是否相交。原理是：如果能找到一条轴，使得两个凸多面体在该轴上的投影（区间）不重叠，那么这两个物体就没有发生碰撞。这条轴被称为分离轴。反之，如果找不到任何这样的分离轴，那么这两个物体就必然发生了碰撞。</p>
+<h2 id="gjkepa"><a class="header" href="#gjkepa">GJK+EPA</a></h2>
+<p>GJK是另一种用于凸体碰撞检测的流行算法，它通常比SAT更快，尤其是在处理曲面形状（如球体、胶囊体）时。如果GJK确认了碰撞，接下来通过扩展多边形算法（Expanding Polytope Algorithm, EPA）的后续步骤来精确计算穿透法线和深度。</p>
+<p>GJK的原理是：将两个凸物体的碰撞问题转化为“是否包含原点”问题。具体实现方法是通过逐步构建一个称为**单纯形（Simplex）**的小多边形（在3D中最多是一个四面体），来逼近并判断闵可夫斯基差形状是否包含原点。</p>
+<p>EPA的原理是：从 GJK 得到的内点单纯形出发，沿凸集边界膨胀，找到原点到凸包表面最短距离，从而确定碰撞响应信息。</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="参考书籍"><a href="#参考书籍" class="header">参考书籍</a></h1>
+<h1 id="sat算法"><a href="#sat算法" class="header">SAT算法</a></h1>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="gjk和epa算法"><a href="#gjk和epa算法" class="header">GJK和EPA算法</a></h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="参考文献"><a class="header" href="#参考文献">参考文献</a></h1>
+<h2 id="推荐书籍"><a class="header" href="#推荐书籍">推荐书籍</a></h2>
+<ol>
+<li><strong>《Game Physics Engine Development: How to Build a Robust Commercial-Grade Physics Engine for Your Game》</strong> by Ian Millington</li>
+</ol>
+<p>这本书是游戏物理引擎开发的入门经典，从基础的向量数学、刚体动力学讲起，逐步构建一个完整的物理引擎。它以实践为导向，提供了大量的代码示例和详细的解释，非常适合想要从头开始构建物理引擎的读者。但是，对于约束求解基本没有。代码的项目有些旧，需要转换一下。</p>
+<ol start="2">
+<li><strong>《Physics for Game Developers》</strong> by David M. Bourg and Bryan Bywalec</li>
+</ol>
+<p>封皮上有一只猫。这本书涵盖了游戏开发中所需的各种物理概念，包括运动学、动力学、碰撞检测、粒子系统等。它以易于理解的方式解释了物理原理，并提供了 C++ 代码示例。</p>
+<ol start="3">
+<li>
+<p><strong>《Real-Time Collision Detection》</strong> by Christer Ericson
+专注于碰撞检测领域的权威著作。详细介绍了各种碰撞检测算法，包括 BVH、GJK、SAT、CCD 等。对于任何需要实现高效、鲁棒碰撞检测的开发者来说，这本书是必读的参考资料。基本上所有的碰撞算法都包括了。</p>
+</li>
+<li>
+<p><strong>《Mathematics for 3D Game Programming and Computer Graphics》</strong> by Eric Lengyel
+一本优秀的数学参考书，涵盖了 3D 游戏编程所需的线性代数、几何学、微积分等。对于理解物理引擎背后的数学原理非常有帮助。</p>
+</li>
+</ol>
+<h2 id="推荐视频课程"><a class="header" href="#推荐视频课程">推荐视频课程</a></h2>
+<ol>
+<li>NVIDA和PBD作者Matthias的Youtube专题<a href="https://www.youtube.com/@TenMinutePhysics">Ten Minute Physics</a>.</li>
+<li>Pikuma的<a href="https://pikuma.com/courses/game-physics-engine-programming">2D Game Physics Programming课程</a>.</li>
+</ol>
+<h2 id="推荐文献"><a class="header" href="#推荐文献">推荐文献</a></h2>
+<ol>
+<li><strong>“Position Based Dynamics”</strong> by Matthias Müller, Bruno Heidelberger, Marcus Hennix, John Ratcliff (VRIPHYS 2007)</li>
+<li><strong>“Extended Position Based Dynamics”</strong> by Jan Bender, Matthias Müller, Miles Macklin (SIGGRAPH Asia 2014)</li>
+</ol>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="game-dev"><a class="header" href="#game-dev">Game Dev</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
@@ -1134,13 +1414,250 @@ MyActor-&gt;OnScoreChanged.RemoveDynamic(this, &amp;UMyComponent::HandleScore);
 <p>3D建模是一项结合技术与艺术的技能，从构思到呈现的每个步骤都充满挑战与创意。希望这篇文章能为你的学习旅程提供有用的指导。无论你是初学者还是有经验的创作者，保持好奇心、持续实践，并总结经验，都会帮助你不断进步。每一次挑战都带来新的成长，期待你在3D建模的世界中，创造出属于自己的精彩作品。</p>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="mdbook写作和发布流程"><a class="header" href="#mdbook写作和发布流程">mdbook写作和发布流程</a></h1>
-<h1 id="主要流程和软件工具"><a class="header" href="#主要流程和软件工具">主要流程和软件工具</a></h1>
-<h1 id="mdbook相关配置"><a class="header" href="#mdbook相关配置">mdbook相关配置</a></h1>
-<h1 id="github相关配置"><a class="header" href="#github相关配置">Github相关配置</a></h1>
-<h1 id="其他软件简介"><a class="header" href="#其他软件简介">其他软件简介</a></h1>
-<h2 id="working-copy"><a class="header" href="#working-copy">Working Copy</a></h2>
-<h2 id="obsidian"><a class="header" href="#obsidian">Obsidian</a></h2>
-<h2 id="textastic"><a class="header" href="#textastic">Textastic</a></h2>
+<p>本文旨在为技术作者，特别是物理引擎、图形学、科学计算等领域的开发者，提供一套完整、高效且自动化的技术文档解决方案。之前，我尝试过多种方法，都会出现各种各样问题，耗费大量时间解决工具格式兼容问题。最后，我总结这套整合 mdBook、KaTeX 插件和 GitHub Pages，构建一个从内容撰写到网站部署的无缝工作流。</p>
+<h2 id="工作流程简述"><a class="header" href="#工作流程简述">工作流程简述</a></h2>
+<p>使用Mdbook创建电子书项目，然后通过markdown的格式进行内存创作，本地编译电子书进行预览和修改。这里，使用两个Github仓库A和B，A负责存电子书项目代码，B负责发布。最后同步仓库A，然后通过仓库B的Github Page进行发布。</p>
+<h2 id="使用软件包"><a class="header" href="#使用软件包">使用软件包</a></h2>
+<ul>
+<li>visual studio code：markdown的书写工具。</li>
+<li>rust安装包：因为mdbook基于rust开发，提供运行环境。</li>
+<li>mdbook安装包：通过mdbook，编译markdown文件变成html。</li>
+<li>mdbook-KaTeX插件：用于书写latex格式的公式。</li>
+</ul>
+<h2 id="操作实践"><a class="header" href="#操作实践">操作实践</a></h2>
+<h3 id="配置mdbook环境"><a class="header" href="#配置mdbook环境">配置mdbook环境</a></h3>
+<ol>
+<li>
+<p>安装rustup包。可以从<a href="https://rustup.rs/">这里</a> 下载。安装成功后，可以运行<code>cargo</code>命令。</p>
+</li>
+<li>
+<p>通过Rust包管理器<code>cargo</code>安装mdbook包。</p>
+</li>
+</ol>
+<pre><code class="language-Bash">cargo install mdbook
+</code></pre>
+<ol start="3">
+<li>创建mdbook项目。</li>
+</ol>
+<pre><code class="language-Bash">mdbook init my-physics-book
+</code></pre>
+<ol start="4">
+<li>
+<p>配置<code>book.toml</code>文件和<code>SUMMARY.md</code>目录文件。添加需要的markdown文件。关于配置的细节见后面章节。</p>
+</li>
+<li>
+<p>使用命令在本地预览电子书。</p>
+</li>
+</ol>
+<pre><code class="language-Bash">mdbook serve --open
+</code></pre>
+<h3 id="配置github项目"><a class="header" href="#配置github项目">配置Github项目</a></h3>
+<ol>
+<li>注册Github账号。</li>
+<li>创建两个仓库，A为private,保存书的源代码。B为Public,负责发布。</li>
+<li>将本地电子书项目同步到仓库A上。配置.gitignore文件。</li>
+</ol>
+<pre><code class="language-Bash"># 在.gitignore中，忽略mdbook build output
+/book/
+</code></pre>
+<h3 id="发布电子书"><a class="header" href="#发布电子书">发布电子书</a></h3>
+<ol>
+<li>安装ghp-import工具。</li>
+</ol>
+<pre><code>python -m pip install ghp-import
+</code></pre>
+<ol start="2">
+<li>
+<p>修改Github仓库B的Settings/Pages/Build and deplayment选项，记得将Branch下面改为gh-pages/root。</p>
+</li>
+<li>
+<p>本地编译电子书,编译后电子书，会在/book下面。</p>
+</li>
+</ol>
+<pre><code>mdbook build
+</code></pre>
+<ol start="4">
+<li>把本地的/book内容强制提交到当前仓库B的 gh-pages 分支，并立即推送到远端，同时禁用 Jekyll 处理。”</li>
+</ol>
+<pre><code class="language-Bash">ghp-import book -r git@github.com:账号/B.git -b gh-pages -p
+</code></pre>
+<p>最后，记得同步仓库A，做好备份。</p>
+<h2 id="mdbook配置"><a class="header" href="#mdbook配置">mdbook配置</a></h2>
+<ul>
+<li>book.toml配置
+在book.toml中，添加下面内容，开启katex配置，这样才能用<code>$$ $$</code>(Latex格式)写公式。</li>
+</ul>
+<pre><code>[preprocessor.katex]
+after = ["links"]
+renderers = ["html"]
+</code></pre>
+<h2 id="关于visual-studio-code配置"><a class="header" href="#关于visual-studio-code配置">关于Visual Studio Code配置</a></h2>
+<p>推荐安装下面插件：</p>
+<ul>
+<li>Markdown all in One</li>
+<li>Markdown preview enhanced</li>
+</ul>
+<p>在编辑的<code>.md</code>文件上，使用<code>ctrl+shift+V</code>打开预览，进行所见即所得的编写。</p>
+<h2 id="mdbook对markdown扩展"><a class="header" href="#mdbook对markdown扩展">mdbook对Markdown扩展</a></h2>
+<p>这里我罗列一些常用的扩展。</p>
+<h3 id="划线"><a class="header" href="#划线">划线</a></h3>
+<pre><code>An example of ~~strikethrough text~~.
+</code></pre>
+<p>An example of <del>strikethrough text</del>.</p>
+<h3 id="注释"><a class="header" href="#注释">注释</a></h3>
+<p>脚注会在正文中生成一个小的编号链接，点击后 引导读者进入条目底部的脚注文本。这里写两个注释。</p>
+<pre><code>这是一个注释的例子[^note1]。
+
+[^note1]: 这里是脚注的内容。在文章底部。
+
+This is an example of a footnote[^note2].
+
+[^note2]: This text is the contents of the footnote, which will be rendered
+    towards the bottom.
+
+</code></pre>
+<p>注释的渲染结果如下：</p>
+<p>这是一个注释的例子<sup class="footnote-reference" id="fr-note1-1"><a href="#footnote-note1">1</a></sup>。</p>
+<p>This is an example of a footnote<sup class="footnote-reference" id="fr-note2-1"><a href="#footnote-note2">2</a></sup>.</p>
+<h3 id="定义列表"><a class="header" href="#定义列表">定义列表</a></h3>
+<p>这个功能可以用来制作专业术表。</p>
+<pre><code> 2D引擎
+  ：Box2D
+
+常见物理引擎
+  : Bullet3
+  : 2D的Box2D
+  ：PhysX
+</code></pre>
+<p>渲染结果如下：</p>
+<p>2D引擎
+：Box2D</p>
+<dl>
+<dt id="常见物理引擎"><a class="header" href="#常见物理引擎">常见物理引擎</a></dt>
+<dd>Bullet3</dd>
+<dd>2D的Box2D
+：PhysX</dd>
+</dl>
+<h3 id="重要信息提示"><a class="header" href="#重要信息提示">重要信息提示</a></h3>
+<p>可以通过下面格式生成不同类型的提示信息。</p>
+<pre><code>&gt; [!NOTE]
+&gt; 一般信息
+
+&gt; [!TIP]
+&gt; 一个有用的建议或最佳实践。
+
+&gt; [!IMPORTANT]
+&gt; 一个有用的建议或最佳实践。
+
+&gt; [!WARNING]
+&gt; 关键信息突出潜在风险。
+
+&gt; [!CAUTION]
+&gt; 关于需要谨慎的潜在问题的信息。
+</code></pre>
+<p>渲染后的结果如下：</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>一般信息</p>
+</blockquote>
+<blockquote class="blockquote-tag blockquote-tag-tip">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p>
+<p>一个有用的建议或最佳实践。</p>
+</blockquote>
+<blockquote class="blockquote-tag blockquote-tag-important">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p>
+<p>一个有用的建议或最佳实践。</p>
+</blockquote>
+<blockquote class="blockquote-tag blockquote-tag-warning">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Warning</p>
+<p>关键信息突出潜在风险。</p>
+</blockquote>
+<blockquote class="blockquote-tag blockquote-tag-caution">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 0 1-.22.53l-4.25 4.25A.749.749 0 0 1 11 16H5a.749.749 0 0 1-.53-.22L.22 11.53A.749.749 0 0 1 0 11V5c0-.199.079-.389.22-.53Zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Caution</p>
+<p>关于需要谨慎的潜在问题的信息。</p>
+</blockquote>
+<h2 id="参考文献-1"><a class="header" href="#参考文献-1">参考文献</a></h2>
+<p>[1] https://rust-lang.github.io/mdBook/index.html</p>
+<hr>
+<ol class="footnote-definition">
+<li id="footnote-note1">
+<p>这里是脚注的内容。在文章底部。 <a href="#fr-note1-1">↩</a></p>
+</li>
+<li id="footnote-note2">
+<p>This text is the contents of the footnote, which will be rendered
+towards the bottom. <a href="#fr-note2-1">↩</a></p>
+</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="vcpkg用法总结"><a class="header" href="#vcpkg用法总结">vcpkg用法总结</a></h1>
+<p>在 C++ 开发中，管理第三方库一直是个麻烦事。依赖库版本、编译配置、跨平台兼容性……而 vcpkg 提供了一个统一、高效的解决方案，让 C++ 开发者可以像使用 npm、pip 一样轻松管理依赖。本文将介绍 vcpkg 的基本用法，并演示如何用它搭建 OpenGL 或物理引擎的测试平台。</p>
+<h2 id="什么是vcpkg"><a class="header" href="#什么是vcpkg">什么是vcpkg</a></h2>
+<p>vcpkg 是微软推出的 C++ 包管理工具[1]，主要特点：可以跨平台；通过命令行即可下载、编译和安装库；可与 Visual Studio、CMake 完美结合；可以指定库的版本、特性（features）和目标架构（triplets）。</p>
+<h2 id="vcpkg核心用法"><a class="header" href="#vcpkg核心用法">vcpkg核心用法</a></h2>
+<ul>
+<li>安装与环境配置：在需要安装位置，克隆其 GitHub 仓库并运行引导脚本,以Windows为例。</li>
+</ul>
+<pre><code class="language-Bash">git clone https://github.com/microsoft/vcpkg
+cd vcpkg
+.\bootstrap-vcpkg.bat
+</code></pre>
+<p>运行脚本后，vcpkg可执行文件会被下载和编译，环境配置完成。</p>
+<ul>
+<li>经典模式和清单模式
+vcpkg提供两种管理模式：</li>
+</ul>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>特性</th><th>经典模式 (Classic Mode)</th><th>清单模式 (Manifest Mode)</th></tr>
+</thead>
+<tbody>
+<tr><td>定义</td><td>通过命令行 <code>vcpkg install &lt;package&gt;</code></td><td>通过项目根目录的 <code>vcpkg.json</code> 文件</td></tr>
+<tr><td>安装位置</td><td>全局安装到 vcpkg 根目录下的 <code>installed/</code> 文件夹</td><td>项目本地的 <code>vcpkg_installed/</code> 文件夹</td></tr>
+<tr><td>适用场景</td><td>快速测试、全局工具安装、简单的单文件项目</td><td>推荐用于所有正式项目，实现项目级依赖隔离和版本控制</td></tr>
+<tr><td>版本控制</td><td>依赖于 vcpkg 仓库的当前状态</td><td>通过 <code>vcpkg.json</code> 和 <code>vcpkg-configuration.json</code> 锁定版本基线</td></tr>
+</tbody>
+</table>
+</div>
+<p>清单模式是现代 C++ 项目的推荐做法，它通过一个简单的 <code>vcpkg.json</code> 文件来声明项目所需的所有依赖，确保了项目在不同机器上的可重复构建性。</p>
+<ul>
+<li>常用命令详解</li>
+</ul>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>命令</th><th>描述</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td><code>vcpkg search &lt;query&gt;</code></td><td>搜索可用的库包</td><td><code>vcpkg search bullet</code></td></tr>
+<tr><td><code>vcpkg install &lt;package&gt;</code></td><td>安装指定的库包</td><td><code>vcpkg install glfw3:x64-windows</code></td></tr>
+<tr><td><code>vcpkg remove &lt;package&gt;</code></td><td>卸载指定的库包</td><td><code>vcpkg remove glfw3</code></td></tr>
+<tr><td><code>vcpkg integrate install</code></td><td>全局集成，用于 MSBuild 项目</td><td><code>vcpkg integrate install</code></td></tr>
+<tr><td><code>vcpkg new --application</code></td><td>在当前目录创建 <code>vcpkg.json</code> 和 <code>vcpkg-configuration.json</code></td><td><code>vcpkg new --application</code></td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="最简单模式vcpkg--visual-studio--classic-mode"><a class="header" href="#最简单模式vcpkg--visual-studio--classic-mode">最简单模式：vcpkg + Visual Studio + classic mode</a></h2>
+<p>这是最简单的使用模式，vcpkg 提供了用户范围的集成，实现了真正的“零配置”依赖管理。</p>
+<ol>
+<li>
+<p>安装vcpkg配置。</p>
+</li>
+<li>
+<p>使用<code>vcpkg install</code>安装需要的库。</p>
+</li>
+<li>
+<p>执行VS集成命令</p>
+</li>
+</ol>
+<pre><code class="language-Bash">vcpkg integrate install
+</code></pre>
+<p>这个命令只需要运行一次。它会在 Visual Studio 的配置中注入一个 MSBuild 属性表，使得 VS 能够自动识别 vcpkg 安装目录下的所有库。</p>
+<ol start="4">
+<li>直接在项目中的<code>.cpp</code>文件直接<code>include</code>需要文件即可，然后编译。</li>
+</ol>
+<h2 id="参考文献-2"><a class="header" href="#参考文献-2">参考文献</a></h2>
+<p>[1] https://vcpkg.io/en/</p>
 
                     </main>
 

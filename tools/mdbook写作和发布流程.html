@@ -14,8 +14,8 @@
 
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
-        <link rel="stylesheet" href="../css/variables-8adf115d.css">
-        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/variables-af99728e.css">
+        <link rel="stylesheet" href="../css/general-5a2affe6.css">
         <link rel="stylesheet" href="../css/chrome-ae938929.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
@@ -23,7 +23,7 @@
         <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-dd8e6b8c.css">
         <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
         <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
 
@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-f6b6a3ef.js";
+            window.path_to_searchindex_js = "../searchindex-9ab0a0ee.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-d332d9ff.js"></script>
+        <script src="../toc-71bd4c3d.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -176,13 +176,180 @@
                     <main>
                         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="mdbook写作和发布流程"><a class="header" href="#mdbook写作和发布流程">mdbook写作和发布流程</a></h1>
-<h1 id="主要流程和软件工具"><a class="header" href="#主要流程和软件工具">主要流程和软件工具</a></h1>
-<h1 id="mdbook相关配置"><a class="header" href="#mdbook相关配置">mdbook相关配置</a></h1>
-<h1 id="github相关配置"><a class="header" href="#github相关配置">Github相关配置</a></h1>
-<h1 id="其他软件简介"><a class="header" href="#其他软件简介">其他软件简介</a></h1>
-<h2 id="working-copy"><a class="header" href="#working-copy">Working Copy</a></h2>
-<h2 id="obsidian"><a class="header" href="#obsidian">Obsidian</a></h2>
-<h2 id="textastic"><a class="header" href="#textastic">Textastic</a></h2>
+<p>本文旨在为技术作者，特别是物理引擎、图形学、科学计算等领域的开发者，提供一套完整、高效且自动化的技术文档解决方案。之前，我尝试过多种方法，都会出现各种各样问题，耗费大量时间解决工具格式兼容问题。最后，我总结这套整合 mdBook、KaTeX 插件和 GitHub Pages，构建一个从内容撰写到网站部署的无缝工作流。</p>
+<h2 id="工作流程简述"><a class="header" href="#工作流程简述">工作流程简述</a></h2>
+<p>使用Mdbook创建电子书项目，然后通过markdown的格式进行内存创作，本地编译电子书进行预览和修改。这里，使用两个Github仓库A和B，A负责存电子书项目代码，B负责发布。最后同步仓库A，然后通过仓库B的Github Page进行发布。</p>
+<h2 id="使用软件包"><a class="header" href="#使用软件包">使用软件包</a></h2>
+<ul>
+<li>visual studio code：markdown的书写工具。</li>
+<li>rust安装包：因为mdbook基于rust开发，提供运行环境。</li>
+<li>mdbook安装包：通过mdbook，编译markdown文件变成html。</li>
+<li>mdbook-KaTeX插件：用于书写latex格式的公式。</li>
+</ul>
+<h2 id="操作实践"><a class="header" href="#操作实践">操作实践</a></h2>
+<h3 id="配置mdbook环境"><a class="header" href="#配置mdbook环境">配置mdbook环境</a></h3>
+<ol>
+<li>
+<p>安装rustup包。可以从<a href="https://rustup.rs/">这里</a> 下载。安装成功后，可以运行<code>cargo</code>命令。</p>
+</li>
+<li>
+<p>通过Rust包管理器<code>cargo</code>安装mdbook包。</p>
+</li>
+</ol>
+<pre><code class="language-Bash">cargo install mdbook
+</code></pre>
+<ol start="3">
+<li>创建mdbook项目。</li>
+</ol>
+<pre><code class="language-Bash">mdbook init my-physics-book
+</code></pre>
+<ol start="4">
+<li>
+<p>配置<code>book.toml</code>文件和<code>SUMMARY.md</code>目录文件。添加需要的markdown文件。关于配置的细节见后面章节。</p>
+</li>
+<li>
+<p>使用命令在本地预览电子书。</p>
+</li>
+</ol>
+<pre><code class="language-Bash">mdbook serve --open
+</code></pre>
+<h3 id="配置github项目"><a class="header" href="#配置github项目">配置Github项目</a></h3>
+<ol>
+<li>注册Github账号。</li>
+<li>创建两个仓库，A为private,保存书的源代码。B为Public,负责发布。</li>
+<li>将本地电子书项目同步到仓库A上。配置.gitignore文件。</li>
+</ol>
+<pre><code class="language-Bash"># 在.gitignore中，忽略mdbook build output
+/book/
+</code></pre>
+<h3 id="发布电子书"><a class="header" href="#发布电子书">发布电子书</a></h3>
+<ol>
+<li>安装ghp-import工具。</li>
+</ol>
+<pre><code>python -m pip install ghp-import
+</code></pre>
+<ol start="2">
+<li>
+<p>修改Github仓库B的Settings/Pages/Build and deplayment选项，记得将Branch下面改为gh-pages/root。</p>
+</li>
+<li>
+<p>本地编译电子书,编译后电子书，会在/book下面。</p>
+</li>
+</ol>
+<pre><code>mdbook build
+</code></pre>
+<ol start="4">
+<li>把本地的/book内容强制提交到当前仓库B的 gh-pages 分支，并立即推送到远端，同时禁用 Jekyll 处理。”</li>
+</ol>
+<pre><code class="language-Bash">ghp-import book -r git@github.com:账号/B.git -b gh-pages -p
+</code></pre>
+<p>最后，记得同步仓库A，做好备份。</p>
+<h2 id="mdbook配置"><a class="header" href="#mdbook配置">mdbook配置</a></h2>
+<ul>
+<li>book.toml配置
+在book.toml中，添加下面内容，开启katex配置，这样才能用<code>$$ $$</code>(Latex格式)写公式。</li>
+</ul>
+<pre><code>[preprocessor.katex]
+after = ["links"]
+renderers = ["html"]
+</code></pre>
+<h2 id="关于visual-studio-code配置"><a class="header" href="#关于visual-studio-code配置">关于Visual Studio Code配置</a></h2>
+<p>推荐安装下面插件：</p>
+<ul>
+<li>Markdown all in One</li>
+<li>Markdown preview enhanced</li>
+</ul>
+<p>在编辑的<code>.md</code>文件上，使用<code>ctrl+shift+V</code>打开预览，进行所见即所得的编写。</p>
+<h2 id="mdbook对markdown扩展"><a class="header" href="#mdbook对markdown扩展">mdbook对Markdown扩展</a></h2>
+<p>这里我罗列一些常用的扩展。</p>
+<h3 id="划线"><a class="header" href="#划线">划线</a></h3>
+<pre><code>An example of ~~strikethrough text~~.
+</code></pre>
+<p>An example of <del>strikethrough text</del>.</p>
+<h3 id="注释"><a class="header" href="#注释">注释</a></h3>
+<p>脚注会在正文中生成一个小的编号链接，点击后 引导读者进入条目底部的脚注文本。这里写两个注释。</p>
+<pre><code>这是一个注释的例子[^note1]。
+
+[^note1]: 这里是脚注的内容。在文章底部。
+
+This is an example of a footnote[^note2].
+
+[^note2]: This text is the contents of the footnote, which will be rendered
+    towards the bottom.
+
+</code></pre>
+<p>注释的渲染结果如下：</p>
+<p>这是一个注释的例子<sup class="footnote-reference" id="fr-note1-1"><a href="#footnote-note1">1</a></sup>。</p>
+<p>This is an example of a footnote<sup class="footnote-reference" id="fr-note2-1"><a href="#footnote-note2">2</a></sup>.</p>
+<h3 id="定义列表"><a class="header" href="#定义列表">定义列表</a></h3>
+<p>这个功能可以用来制作专业术表。</p>
+<pre><code> 2D引擎
+  ：Box2D
+
+常见物理引擎
+  : Bullet3
+  : 2D的Box2D
+  ：PhysX
+</code></pre>
+<p>渲染结果如下：</p>
+<p>2D引擎
+：Box2D</p>
+<dl>
+<dt id="常见物理引擎"><a class="header" href="#常见物理引擎">常见物理引擎</a></dt>
+<dd>Bullet3</dd>
+<dd>2D的Box2D
+：PhysX</dd>
+</dl>
+<h3 id="重要信息提示"><a class="header" href="#重要信息提示">重要信息提示</a></h3>
+<p>可以通过下面格式生成不同类型的提示信息。</p>
+<pre><code>&gt; [!NOTE]
+&gt; 一般信息
+
+&gt; [!TIP]
+&gt; 一个有用的建议或最佳实践。
+
+&gt; [!IMPORTANT]
+&gt; 一个有用的建议或最佳实践。
+
+&gt; [!WARNING]
+&gt; 关键信息突出潜在风险。
+
+&gt; [!CAUTION]
+&gt; 关于需要谨慎的潜在问题的信息。
+</code></pre>
+<p>渲染后的结果如下：</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>一般信息</p>
+</blockquote>
+<blockquote class="blockquote-tag blockquote-tag-tip">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p>
+<p>一个有用的建议或最佳实践。</p>
+</blockquote>
+<blockquote class="blockquote-tag blockquote-tag-important">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p>
+<p>一个有用的建议或最佳实践。</p>
+</blockquote>
+<blockquote class="blockquote-tag blockquote-tag-warning">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Warning</p>
+<p>关键信息突出潜在风险。</p>
+</blockquote>
+<blockquote class="blockquote-tag blockquote-tag-caution">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 0 1-.22.53l-4.25 4.25A.749.749 0 0 1 11 16H5a.749.749 0 0 1-.53-.22L.22 11.53A.749.749 0 0 1 0 11V5c0-.199.079-.389.22-.53Zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Caution</p>
+<p>关于需要谨慎的潜在问题的信息。</p>
+</blockquote>
+<h2 id="参考文献"><a class="header" href="#参考文献">参考文献</a></h2>
+<p>[1] https://rust-lang.github.io/mdBook/index.html</p>
+<hr>
+<ol class="footnote-definition">
+<li id="footnote-note1">
+<p>这里是脚注的内容。在文章底部。 <a href="#fr-note1-1">↩</a></p>
+</li>
+<li id="footnote-note2">
+<p>This text is the contents of the footnote, which will be rendered
+towards the bottom. <a href="#fr-note2-1">↩</a></p>
+</li>
+</ol>
 
                     </main>
 
@@ -192,6 +359,9 @@
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
+                            <a rel="next prefetch" href="../tools/Vcpkg.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -203,6 +373,9 @@
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
+                    <a rel="next prefetch" href="../tools/Vcpkg.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
             </nav>
 
         </div>

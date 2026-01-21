@@ -7,7 +7,13 @@
 }
 
 html {
-    font-family: "Open Sans", sans-serif;
+    font-family:
+        "Open Sans",
+        "Source Han Sans SC",
+        "Noto Sans CJK SC",
+        "PingFang SC",
+        "Microsoft YaHei",
+        sans-serif;
     color: var(--fg);
     background-color: var(--bg);
     text-size-adjust: none;
@@ -406,3 +412,4 @@ dd > p {
     /* Add some space between the icon and the text. */
     margin-right: 8px;
 }
+

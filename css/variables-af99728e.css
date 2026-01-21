@@ -1,4 +1,3 @@
-
 /* Globals */
 
 :root {
@@ -9,8 +8,22 @@
     --page-padding: 15px;
     --content-max-width: 750px;
     --menu-bar-height: 50px;
-    --mono-font: "Source Code Pro", Consolas, "Ubuntu Mono", Menlo, "DejaVu Sans Mono", monospace, monospace;
-    --code-font-size: 0.875em; /* please adjust the ace font size accordingly in editor.js */
+    --mono-font:
+        "Source Code Pro",
+        Consolas,
+        "Ubuntu Mono",
+        Menlo,
+        "DejaVu Sans Mono",
+        /* 中文 fallback：使用正文字体 */
+        "Source Han Sans SC",
+        "Noto Sans CJK SC",
+        "PingFang SC",
+        "Microsoft YaHei",
+        monospace;
+
+
+    --code-font-size: 0.875em;
+    /* please adjust the ace font size accordingly in editor.js */
     --searchbar-margin-block-start: 5px;
 }
 
@@ -138,7 +151,8 @@
     --sidebar-header-border-color: #3473ad;
 }
 
-.light, html:not(.js) {
+.light,
+html:not(.js) {
     --bg: hsl(0, 0%, 100%);
     --fg: hsl(0, 0%, 0%);
 

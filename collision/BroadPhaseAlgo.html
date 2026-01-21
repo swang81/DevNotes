@@ -3,8 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Page not found - Game Physics &amp; Development Notes</title>
-        <base href="/">
+        <title>Broadphase检测 - Game Physics &amp; Development Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -13,33 +12,33 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
 
-        <link rel="icon" href="favicon-de23e50b.svg">
-        <link rel="shortcut icon" href="favicon-8114d1fc.png">
-        <link rel="stylesheet" href="css/variables-af99728e.css">
-        <link rel="stylesheet" href="css/general-5a2affe6.css">
-        <link rel="stylesheet" href="css/chrome-ae938929.css">
-        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-af99728e.css">
+        <link rel="stylesheet" href="../css/general-5a2affe6.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
-        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-dd8e6b8c.css">
-        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
-        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-dd8e6b8c.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
 
         <!-- Custom theme stylesheets -->
 
 
         <!-- Provide site root and default themes to javascript -->
         <script>
-            const path_to_root = "";
+            const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-9ab0a0ee.js";
+            window.path_to_searchindex_js = "../searchindex-9ab0a0ee.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-71bd4c3d.js"></script>
+        <script src="../toc-71bd4c3d.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -106,7 +105,7 @@
             <!-- populated by js -->
             <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
             <noscript>
-                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
             </noscript>
             <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -141,7 +140,7 @@
                     <h1 class="menu-title">Game Physics &amp; Development Notes</h1>
 
                     <div class="right-buttons">
-                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
                             <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
                         </a>
 
@@ -175,14 +174,74 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="document-not-found-404"><a class="header" href="#document-not-found-404">Document not found (404)</a></h1>
-<p>This URL is invalid, sorry. Please use the navigation bar or search to continue.</p>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="宽相检测"><a class="header" href="#宽相检测">宽相检测</a></h1>
+<h2 id="原理说明"><a class="header" href="#原理说明">原理说明</a></h2>
+<p>宽相碰撞检测目标是生成一个可能发生碰撞的“碰撞对列表”。所有宽相算法都基于一个简单的思想：用一个简单的、计算开销小的几何体（称为<strong>包围体</strong>）来包裹复杂的物体。如果两个物体的包围体没有重叠，那么这两个物体本身也一定没有重叠。</p>
+<p>最常用的包围体是<strong>轴对齐包围盒 (Axis-Aligned Bounding Box, AABB)</strong>。一个 AABB 可以由两个点（最小值点 <code>min</code> 和最大值点 <code>max</code>）来定义。检查两个 AABB 是否重叠非常快速，只需要在三个轴上分别检查它们的区间是否重叠即可。</p>
+<h2 id="常见宽相算法"><a class="header" href="#常见宽相算法">常见宽相算法</a></h2>
+<p>常见的宽相算法有下面几种：</p>
+<ul>
+<li>
+<p><strong>直接遍历</strong>
+直接两两检查所有物体的包围体是否重叠。复杂度为<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。当物体数量增多时，性能很差。所以，仅适合小规模场景或者教学示例。</p>
+</li>
+<li>
+<p><strong>网格法</strong>
+将整个世界空间划分为一系列均匀大小的单元格。每个单元格存储其中包含的物体列表。对于一个物体，只需检查它所在的单元格及其相邻单元格中的物体。如果物体分布不均匀，大量单元格是空的，浪费内存。一个物体可能跨越多个单元格，需要额外处理。单元格的大小对性能影响很大，过大和过小都不行。在工程上，会用Dynamic Spatial Hashing来实现存储和管理。</p>
+</li>
+<li>
+<p><strong>四叉树和八叉树</strong>
+递归地将空间划分为更小的子空间。四叉树用于 2D 空间，八叉树用于3D空间。当一个子空间中的物体数量超过阈值时，该子空间会被进一步细分,可以自定义一个叶子节点上最多几个物体。重叠测试流程：通过遍历树结构，检查那些与查询物体包围盒重叠的节点的物体。通过这种方法，可以很好的适应物体分布不均匀的场景，进行快速查询。如果一个物体跨越多个节点时，需要特殊处理，比如放在父节点或者子节点（需要去重）。</p>
+</li>
+<li>
+<p><strong>Sweep and Prune (SAP / Sort and Sweep)</strong></p>
+</li>
+</ul>
+<p>SAP 全称 Sweep and Prune（扫描与剪枝），也称 Sort and Sweep (SAS)。SAS 是算法思想，SAP 是其高效实现与优化版本。SAP 的核心思想是：</p>
+<ol>
+<li>每个物体用 AABB 包围，并在每个轴上有最小值（start）和最大值（end）；</li>
+<li>选择一个主轴（通常是 X 轴），将物体在该轴的端点排序；</li>
+<li>按排序顺序扫描端点，维护活动列表（Active List），生成在主轴上重叠的候选碰撞对；</li>
+<li>对候选对在其他轴（Y、Z）上做重叠检查（剪枝），只有在所有轴都重叠的情况下才将其保留为潜在碰撞对；</li>
+<li>候选对送到窄相检测阶段进行精确碰撞检测。</li>
+</ol>
+<p>核心原则：<strong>排序轴做大规模剪枝，其他轴做精细剪枝</strong>。这种方式可以大幅减少不必要的碰撞测试，同时保持增量更新高效。</p>
+<ul>
+<li><strong>Dynamic Bounding Volume Tree</strong>
+动态包围体树，简称DBVT。DBVT是一种二叉树结构，树的每个节点都存储一个AABB。树的叶子节点存储实际物体的AABB。父节点的AABB是两个叶子节点的包围盒。如果查询的AABB与某个节点AABB不重叠，就可以快速剪枝，跳过整个子树。树支持动态的更新，允许物体的移动、插入和删除。DBVT可以很好处理动态场景，又能处理稀疏和密集的物体分布。</li>
+</ul>
+<h2 id="主流物理引擎的宽相实践"><a class="header" href="#主流物理引擎的宽相实践">主流物理引擎的宽相实践</a></h2>
+<p>Box2D: 使用的DBVT算法.</p>
+<p>Bullet3: 提供了多种宽相检测算法。</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Broadphase class</th><th>算法</th><th>时间复杂度</th><th>备注</th></tr>
+</thead>
+<tbody>
+<tr><td><code>btDbvtBroadphase</code></td><td>DBVT</td><td><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mord mathnormal">L</span><span class="mord mathnormal">o</span><span class="mord mathnormal" style="margin-right:0.03588em;">g</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></td><td>默认</td></tr>
+<tr><td><code>btAxisSweep3</code></td><td>SAP(16-bit)</td><td><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></td><td></td></tr>
+<tr><td><code>bt32BitAxisSweep3</code></td><td>SAP(32-bit)</td><td><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathnormal">n</span><span class="mclose">)</span></span></span></span></td><td></td></tr>
+<tr><td><code>btSimpleBroadphase</code></td><td>暴力AABB</td><td><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></td><td>测试用</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Dynamic Spatial Hashing</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../collision/BroadAndNarrowPhase.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
 
+                            <a rel="next prefetch" href="../collision/NarrowPhase.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -190,7 +249,13 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../collision/BroadAndNarrowPhase.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
 
+                    <a rel="next prefetch" href="../collision/NarrowPhase.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
             </nav>
 
         </div>
@@ -208,13 +273,13 @@
         </script>
 
 
-        <script src="elasticlunr-ef4e11c1.min.js"></script>
-        <script src="mark-09e88c2c.min.js"></script>
-        <script src="searcher-c2a407aa.js"></script>
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
 
-        <script src="clipboard-1626706a.min.js"></script>
-        <script src="highlight-abc7f01d.js"></script>
-        <script src="book-a0b12cfe.js"></script>
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
 
         <!-- Custom JS scripts -->
 
