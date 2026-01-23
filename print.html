@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-9ab0a0ee.js";
+            window.path_to_searchindex_js = "searchindex-241add65.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-71bd4c3d.js"></script>
+        <script src="toc-507ab2b0.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -182,11 +182,48 @@
 <p>个人主页：<a href="https://swang81.github.io/">https://swang81.github.io/</a></p>
 <p>在线阅读（GitHub Pages）：<a href="https://swang81.github.io/DevNotes/">GamePhysicsNotes</a></p>
 <p>作者：小杰克</p>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="物理引擎技术"><a href="#物理引擎技术" class="header">物理引擎技术</a></h1>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="概述欢迎来到物理引擎的真实世界"><a class="header" href="#概述欢迎来到物理引擎的真实世界">概述：欢迎来到物理引擎的真实世界</a></h1>
+<p>您是否曾惊叹于游戏中物体碰撞的逼真效果？是否曾好奇虚拟世界中的建筑是如何在爆炸中轰然倒塌？或者，您是否梦想过亲手创造一个可信、生动、充满动态之美的交互世界？
+这一切的背后，都由一个强大而精密的“隐形之手”所驱动——物理引擎。</p>
+<h1 id="这份讲义是什么"><a class="header" href="#这份讲义是什么">这份讲义是什么？</a></h1>
+<p>这是一份系统性、实践导向的现代物理引擎技术讲义。它不仅仅是一份知识点的罗列，更是一张引导您从零开始，逐步探索并最终有能力构建一个属于自己的3D刚体物理引擎的详尽蓝图。
+我们的旅程将从最基础的数学物理原理出发，深入剖析一个现代物理引擎的四大核心支柱：</p>
+<ul>
+<li>刚体动力学 (Rigidbody Dynamics)：如何用代码描述物体的运动与旋转。</li>
+<li>碰撞检测 (Collision Detection)：如何让引擎拥有“眼睛”，感知物体的接触与分离。</li>
+<li>约束求解 (Constraint Solver)：如何让引擎拥有“大脑”，处理碰撞、关节等所有物理交互规则。</li>
+<li>性能架构 (Performance &amp; Architecture)：如何让引擎拥有“强健的心脏”，在复杂场景下依然高效运行。
+在此基础上，我们还会将视野拓展到游戏开发的实际应用、前沿的物理模拟技术（如柔体与流体），并为您装备一个强大的“软件工具箱”，让您在开发之路上如虎添翼。</li>
+</ul>
+<h1 id="我们的目标读者是谁"><a class="header" href="#我们的目标读者是谁">我们的目标读者是谁？</a></h1>
+<ul>
+<li>游戏开发者：希望深入理解物理引擎黑盒之下工作原理的从业者。</li>
+<li>计算机图形学爱好者：对实时物理模拟充满好奇，渴望将理论付诸实践的学生和研究者。</li>
+<li>有追求的程序员：不满足于调用API，希望挑战复杂系统设计，构建硬核技术作品的工程师。</li>
+<li>未来的引擎开发者：梦想着创造下一个Unity或Unreal，并愿意为此打下坚实基础的开拓者。</li>
+</ul>
+<h1 id="您将从这份讲义中学到什么"><a class="header" href="#您将从这份讲义中学到什么">您将从这份讲义中学到什么？</a></h1>
+<ul>
+<li>构建而非调用：我们的核心理念是“动手实践”。通过每一章的引导，您将不仅仅是“知道”，更是“做到”。您将亲手实现向量库、模拟循环、碰撞算法、约束求解器等核心模块。</li>
+<li>理论与实践的闭环：每一章都为您精心设计了从“核心问题”出发，经由“理论学习”、“代码实践”，最终达成“学习目标”的完整闭环，确保您学有所得，学以致用。</li>
+<li>全局视野：您将理解物理引擎的各个组件是如何协同工作的，形成对复杂系统设计的宏观认识，这种能力将远超物理引擎本身，让您在任何大型软件项目开发中受益。</li>
+<li>解决问题的能力：您将直面并解决诸如“子弹穿纸”、性能瓶颈、数值不稳定等真实世界中的工程难题，掌握分析和调试复杂系统的核心技巧。</li>
+</ul>
+<p>准备好了吗？让我们一起推开这扇通往真实物理世界的大门，开始这段充满挑战与创造乐趣的旅程吧！</p>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="数学物理基础"><a class="header" href="#数学物理基础">数学物理基础</a></h1>
+<h2 id="核心问题"><a class="header" href="#核心问题">核心问题</a></h2>
+<p>我们如何用精确的数学语言来描述一个三维物体的位置、姿态、运动和旋转？当物体受到力的作用时，它的运动状态会如何改变？这是构建一切物理模拟的起点，我们必须先学会这套通用的“物理世界语言”。</p>
+<h2 id="学习目标"><a class="header" href="#学习目标">学习目标</a></h2>
+<p>学完本章后，您将能够：</p>
+<ul>
+<li>运用向量、矩阵和四元数来表示和操作刚体的状态。</li>
+<li>解释牛顿-欧拉方程，并用它来描述力、力矩与加速度之间的关系。</li>
+<li>推导出处理瞬时碰撞的“冲量法”方程。</li>
+<li>建立描述物体间连接（如关节）的“约束方程”的基本形式。</li>
+<li>区分并实现多种数值积分方法（如欧拉法），用于随时间更新物体状态。</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="物理引擎中符号和单位"><a class="header" href="#物理引擎中符号和单位">物理引擎中符号和单位</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
@@ -367,9 +404,18 @@
 例如 RK4 方法：</p>
 <p><span class="katex-display"><span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6528em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span><span class="mbin mtight">+</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.7333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathbf">x</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">i</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:2.0463em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.3603em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">6</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">Δ</span><span class="mord mathnormal">t</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord">2</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord">2</span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">3</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">4</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></span></p>
 <p>其中<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.03148em;">k</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3117em;"><span style="top:-2.55em;margin-left:-0.0315em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>是对不同时间点加速度的加权估计。精度高，震荡小。适合刚体、粒子系统、流体的精确模拟。计算量大，实时性能低。在物理引擎中，游戏中实时刚体很少使用，但在布料或粒子模拟的高精度子系统中可能用到。</p>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="第2章-物理模拟循环"><a href="#第2章-物理模拟循环" class="header">第2章 物理模拟循环</a></h1>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="物理模拟循环"><a class="header" href="#物理模拟循环">物理模拟循环</a></h1>
+<h2 id="核心问题-1"><a class="header" href="#核心问题-1">核心问题</a></h2>
+<p>游戏世界的时间在不断流逝，我们如何确保物理计算能够稳定、有序、高效地随着时间推进？如何协调可能剧烈波动的游戏渲染帧率和必须保持恒定的物理计算频率，以避免“时快时慢”或“子弹穿纸”等诡异现象？</p>
+<h2 id="学习目标-1"><a class="header" href="#学习目标-1">学习目标</a></h2>
+<p>学完本章后，您将能够：</p>
+<ul>
+<li>解释为什么物理模拟需要使用“固定时间步”（Fixed Timestep）。</li>
+<li>实现一个管理游戏时间与物理时间的模拟循环框架。</li>
+<li>描述一个完整的物理模拟单步（Single Step）所包含的核心阶段。</li>
+<li>分析现有物理引擎（如Bullet）的 stepSimulation 函数的宏观流程。</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="游戏引擎的主循环设计"><a class="header" href="#游戏引擎的主循环设计">游戏引擎的主循环设计</a></h1>
 <h2 id="游戏主循环"><a class="header" href="#游戏主循环">游戏主循环</a></h2>
@@ -591,13 +637,34 @@ int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, 
 
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="刚体模拟"><a class="header" href="#刚体模拟">刚体模拟</a></h1>
+<h2 id="核心问题-2"><a class="header" href="#核心问题-2">核心问题</a></h2>
+<p>在代码的世界里，一个“物体”究竟是什么？我们需要用哪些变量来完整描述它的物理状态？当我们知道了作用在它身上的所有力（来自重力、玩家的推力、碰撞的反作用力等），我们具体该如何计算出它在下一瞬间的新位置和新姿态？</p>
+<h2 id="学习目标-2"><a class="header" href="#学习目标-2">学习目标</a></h2>
+<p>学完本章后，您将能够：</p>
+<ul>
+<li>设计并实现一个包含位置、姿态、速度、质量等属性的 RigidBody 数据结构。</li>
+<li>解释质心、惯性张量等属性在动力学计算中的作用。</li>
+<li>实现将力和力矩施加到刚体上的功能。</li>
+<li>应用第一章学到的积分方法，编写出根据当前状态和外力来更新刚体下一时刻状态的函数。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="碰撞检测"><a class="header" href="#碰撞检测">碰撞检测</a></h1>
-<p>碰撞检测主要解决的问题是：场景中的哪些物体在何时、何地、以何种方式发生了接触？</p>
-<p>想象一下：在一个包含N个物体的场景中，潜在的碰撞对有 <code>N*(N-1)/2</code> 个，即 <code>O(N²)</code> 的复杂度。对于一个拥有数千个物体的现代游戏场景，每秒进行60次这样的暴力检查是完全不可行的。</p>
-<p>本章将介绍现代物理引擎如何通过一个多阶段的碰撞检测管线（Collision Detection Pipeline）来智能地解决这个问题。</p>
+<h2 id="核心问题-3"><a class="header" href="#核心问题-3">核心问题</a></h2>
+<p>在一个成千上万个物体构成的复杂虚拟世界里，我们如何快速找出哪些物体碰在了一起？对于那些碰在一起的物体，我们又如何精确地计算出它们接触的深度、方向和具体位置？</p>
+<h2 id="学习目标-3"><a class="header" href="#学习目标-3">学习目标</a></h2>
+<p>学完本章后，您将能够：</p>
+<ul>
+<li>区分Broadphase 和 Narrowphase 的功能和目的。</li>
+<li>实现一个基于AABB树（如DBVT）的Broadphase系统，用于快速筛选碰撞对。</li>
+<li>解释GJK/EPA 算法的核心思想，并用它来检测凸体间的精确碰撞。</li>
+<li>生成包含接触点、法线、穿透深度的接触流形（Contact Manifold）。</li>
+<li>理解连续碰撞检测（CCD）对于解决“子弹穿纸”问题的重要性。</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="宽相和窄相检测"><a class="header" href="#宽相和窄相检测">宽相和窄相检测</a></h1>
-<p>为了将 <code>O(N²)</code> 的复杂度降低到可控范围，碰撞检测系统通常被设计为一个漏斗状的过滤管线，分为两个主要阶段：</p>
+<p>想象一下：在一个包含N个物体的场景中，潜在的碰撞对有 <code>N*(N-1)/2</code> 个，即 <code>O(N²)</code> 的复杂度。对于一个拥有数千个物体的现代游戏场景，每秒进行60次这样的暴力检查是完全不可行的。
+为了将 <code>O(N²)</code> 的复杂度降低到可控范围，碰撞检测系统通常被设计为一个漏斗状的过滤管线，分为两个主要阶段：</p>
 <ul>
 <li>
 <p><strong>宽相（Broad Phase）</strong>：此阶段的目标是使用非常快速但可能不精确的方法，大规模地剔除那些“绝对不可能”发生碰撞的物体对。它就像一个粗略的筛子，允许一些“误报”（False Positives，即报告可能碰撞但实际没有），但绝不允许“漏报”（False Negatives）。其输出是一个“潜在碰撞对”列表。</p>
@@ -681,6 +748,231 @@ int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, 
 <h1 id="gjk和epa算法"><a href="#gjk和epa算法" class="header">GJK和EPA算法</a></h1>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="约束求解"><a class="header" href="#约束求解">约束求解</a></h1>
+<h2 id="核心问题-4"><a class="header" href="#核心问题-4">核心问题</a></h2>
+<p>当一个球撞到地面时，是什么力量阻止它穿透下去？当一扇门被铰链固定在墙上时，是什么机制让它只能旋转而不能飞走？我们如何用一套统一的规则来处理游戏中所有这些碰撞、关节和连接？</p>
+<h2 id="学习目标-4"><a class="header" href="#学习目标-4">学习目标</a></h2>
+<p>学完本章后，您将能够：</p>
+<ul>
+<li>解释什么是“约束”，以及为什么它是现代物理引擎的核心。</li>
+<li>推导出将接触（碰撞）和关节（Hinge, Ball-socket）转化为数学约束方程的过程。</li>
+<li>实现一个简化的序列冲量（Sequential Impulse）求解器的核心迭代逻辑。</li>
+<li>区分预处理（Pre-Step）、求解（Solve）和后处理（Post-Step）在求解器中的作用。</li>
+<li>应用Baumgarte稳定化技术来修正位置误差，提升模拟的真实感。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="物理引擎架构与性能优化"><a class="header" href="#物理引擎架构与性能优化">物理引擎架构与性能优化</a></h1>
+<h2 id="核心问题-5"><a class="header" href="#核心问题-5">核心问题</a></h2>
+<p>当游戏场景变得极其复杂，有成百上千个物体在同时运动和碰撞时，我们如何确保物理引擎不会成为性能瓶颈，让游戏依然保持流畅？有哪些软件架构和底层优化技巧，可以榨干现代硬件的每一分性能？</p>
+<h2 id="学习目标-5"><a class="header" href="#学习目标-5">学习目标</a></h2>
+<p>学完本章后，您将能够：</p>
+<ul>
+<li>设计一个支持多线程的物理引擎管线，并行处理碰撞和求解任务。</li>
+<li>运用AoS/SoA 数据布局变换来提升缓存命中率和SIMD效率。</li>
+<li>实现一套休眠管理系统（Islands），让静止的物体“入睡”以节省计算资源。</li>
+<li>应用碰撞过滤（Collision Filtering）来忽略不必要的碰撞检测。</li>
+<li>理解SIMD和GPU加速在物理计算中的应用场景。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="aos和soa"><a class="header" href="#aos和soa">AoS和SoA</a></h1>
+<p>在现代计算机体系结构中，CPU 的处理速度远超内存访问速度。为了弥补这种差距，CPU 引入了多级缓存（Cache）。当 CPU 需要数据时，它会首先在缓存中查找。如果数据在缓存中（Cache Hit），则访问速度极快；如果不在（Cache Miss），则需要从主内存中加载，这会带来巨大的性能开销。因此，<strong>缓存友好设计</strong>（Cache-Friendly Design）在高性能计算，尤其是游戏物理引擎中，变得至关重要。</p>
+<p>本文将探讨如何通过优化数据结构和内存布局，来提高物理引擎的缓存命中率，从而显著提升性能。</p>
+<h2 id="为什么缓存友好设计很重要"><a class="header" href="#为什么缓存友好设计很重要">为什么缓存友好设计很重要？</a></h2>
+<p>物理引擎通常需要处理大量的物理对象（刚体、碰撞体、约束等），并在每个时间步对它们进行复杂的计算。这些计算往往涉及频繁的数据访问和修改。如果数据在内存中是分散的，或者访问模式不连续，就会导致大量的缓存未命中，使得 CPU 花费大量时间等待数据从主内存加载，而不是执行计算。这被称为<strong>内存墙</strong>（Memory Wall）问题。</p>
+<p>通过缓存友好设计，我们可以：</p>
+<ul>
+<li><strong>减少缓存未命中</strong>：将相关数据存储在内存的连续区域，使得 CPU 在一次缓存行加载中获取更多所需数据。</li>
+<li><strong>提高数据局部性</strong>：利用时间局部性（最近访问的数据很可能再次访问）和空间局部性（访问一个数据后，其附近的数据很可能被访问）。</li>
+<li><strong>充分利用CPU算力</strong>：减少 CPU 等待数据的时间，让其能够更专注于计算。</li>
+</ul>
+<h2 id="数组的组织形式"><a class="header" href="#数组的组织形式">数组的组织形式</a></h2>
+<p>AoS和SoA的两种数据组织形式，对缓存性能有显著影响。</p>
+<h2 id="array-of-structuresaos"><a class="header" href="#array-of-structuresaos">Array of Structures（AoS）</a></h2>
+<p>将一个对象的多个属性打包在一个结构体中，然后将这些结构体存储在一个数组中。例如，</p>
+<pre><code class="language-Cpp">struct RigidBody 
+{ 
+    Vector3 position; 
+    Quaternion orientation; 
+    Vector3 linearVelocity; 
+    ... 
+}; 
+
+RigidBody bodies[N];
+</code></pre>
+<p>每个 <code>RigidBody</code> 结构体在内存中是连续的，但不同 <code>RigidBody</code> 实例的相同属性（例如所有刚体的 <code>position</code>）在内存中是分散的。 这种做法符合直观的面向对象编程思想，易于理解和使用。当访问一个对象时，其所有属性都能一次性加载到缓存中。最大的问题是：缓存效率低。如果某个操作只需要访问对象的部分属性（例如，只更新所有刚体的 <code>position</code>），那么每次加载一个 <code>RigidBody</code> 结构体时，会将不需要的属性也加载到缓存中，浪费缓存空间和带宽。</p>
+<h2 id="structure-of-arrays-soa"><a class="header" href="#structure-of-arrays-soa">Structure of Arrays (SoA)</a></h2>
+<p>将所有对象的相同属性存储在一个数组中。例如，</p>
+<pre><code class="language-Cpp">Vector3 positions[N]; 
+Quaternion orientations[N]; 
+Vector3 linearVelocities[N]; 
+...;
+</code></pre>
+<p>所有刚体的 <code>position</code> 属性存储在连续的内存区域，所有刚体的 <code>orientation</code> 属性存储在另一个连续的内存区域，以此类推。这样做，缓存效率高。当一个操作只需要访问特定属性时（例如，遍历所有刚体并更新 <code>position</code>），CPU 可以连续地访问这些数据，大大提高缓存命中率。SoA 布局非常适合使用 SIMD（Single Instruction, Multiple Data）指令集进行并行处理，因为数据是连续且同构的。缺点是：访问一个对象的多个属性时，需要从不同的数组中获取，可能不如 AoS 直观。访问一个对象时，其所有属性可能不在同一个缓存行中。</p>
+<h2 id="aos和soa使用方式"><a class="header" href="#aos和soa使用方式">AoS和SoA使用方式</a></h2>
+<p>在实际的物理引擎中，通常会根据具体操作的需求来选择 AoS 或 SoA，甚至采用两者的混合模式：</p>
+<ul>
+<li>
+<p>SoA 适用于数据并行操作：例如，在积分阶段，需要遍历所有刚体并更新其位置和速度。此时，将 <code>positions</code>、<code>linearVelocities</code> 等属性存储为独立的数组会非常高效。</p>
+</li>
+<li>
+<p>AoS 适用于单个对象操作：例如，当处理单个刚体的碰撞或关节时，需要访问其所有属性。此时，将所有属性打包在一个结构体中可能更方便。</p>
+</li>
+<li>
+<p>混合模式：可以将相关性强的属性组合成小的 AoS 结构，然后将这些小结构存储为 SoA 数组。例如，</p>
+</li>
+</ul>
+<pre><code class="language-Cpp">struct Transform 
+{ 
+    Vector3 position; 
+    Quaternion orientation; 
+}; 
+
+Transform transforms[N];
+</code></pre>
+<p>和</p>
+<pre><code>struct Velocity 
+{ 
+    Vector3 linear; 
+    Vector3 angular; 
+}; 
+
+Velocity velocities[N];
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="内存池和对象池"><a class="header" href="#内存池和对象池">内存池和对象池</a></h1>
+<p>频繁地分配和释放内存（例如，在碰撞检测中创建和销毁接触点）会导致内存碎片化和性能开销。<strong>内存池</strong>和<strong>对象池</strong>是解决这些问题的有效方法。</p>
+<ul>
+<li><strong>内存池</strong>：预先分配一大块连续的内存，然后从这块内存中分配小块内存。当不再需要时，只是将小块内存标记为可用，而不是真正释放给操作系统。</li>
+<li><strong>对象池</strong>：预先创建好一定数量的对象，当需要对象时从池中获取，使用完毕后归还到池中，而不是销毁。这避免了频繁的对象构造和析构。</li>
+</ul>
+<p>在物理引擎中，接触点、约束、碰撞对等都是频繁创建和销毁的对象，非常适合使用对象池管理。</p>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="simd"><a class="header" href="#simd">SIMD</a></h1>
+<p>在追求极致性能的道路上，多线程利用了“更多”的核心，而 <strong>SIMD (Single Instruction, Multiple Data)</strong> 技术则致力于榨干“每个”核心的计算潜力。SIMD 是一种并行计算的形式，但它发生在比多线程更低的硬件层面上。现代 CPU 的寄存器（CPU内部最快的数据存储单元）通常是128位、256位甚至512位宽，而一个标准的单精度浮点数（float）只有32位。这意味着一个128位的寄存器可以同时容纳4个浮点数。SIMD 指令集（如 Intel 的 SSE/AVX 或 ARM 的 NEON）允许我们用<strong>一条指令</strong>，对这4个浮点数<strong>同时</strong>执行相同的操作（如加法、乘法）。在物理引擎中，充斥着大量对3D向量和4x4矩阵的运算，这使其成为应用 SIMD 优化的完美场景。通过将数据打包并使用 SIMD 指令，我们可以获得数倍的性能提升。</p>
+<h2 id="1-simd-的核心概念"><a class="header" href="#1-simd-的核心概念">1. SIMD 的核心概念</a></h2>
+<p>想象一下，你需要计算两个3D向量的和：<code>c = a + b</code>。</p>
+<p><strong>传统（标量）做法：</strong></p>
+<pre><code class="language-cpp">struct Vector3 { float x, y, z; };
+Vector3 a, b, c;
+// ...
+c.x = a.x + b.x; // 1次加法
+c.y = a.y + b.y; // 1次加法
+c.z = a.z + b.z; // 1次加法
+// 总共需要 3 条独立的加法指令
+</code></pre>
+<p><strong>SIMD 做法：</strong>
+假设我们使用128位的 SIMD 寄存器（可以容纳4个 float）。</p>
+<ol>
+<li>
+<p><strong>数据加载 (Load):</strong> 将向量 <code>a</code> 和 <code>b</code> 的分量加载到 SIMD 寄存器中。由于向量只有3个分量，我们通常会将第4个分量（w）置为0。
+<code>__m128 reg_a = _mm_set_ps(0.0f, a.z, a.y, a.x);</code>
+<code>__m128 reg_b = _mm_set_ps(0.0f, b.z, b.y, b.x);</code></p>
+</li>
+<li>
+<p><strong>SIMD 加法 (Add):</strong> 使用一条 SIMD 加法指令，对两个寄存器中的4对浮点数同时进行加法运算。
+<code>__m128 reg_c = _mm_add_ps(reg_a, reg_b);</code></p>
+</li>
+<li>
+<p><strong>数据存储 (Store):</strong> 将结果从 SIMD 寄存器中存回内存。
+<code>_mm_store_ps(&amp;c.x, reg_c);</code></p>
+</li>
+</ol>
+<p>在这个例子中，我们用<strong>一条</strong> <code>_mm_add_ps</code> 指令完成了原本需要3条指令的工作。虽然有数据加载和存储的开销，但在大量的连续计算中，这种收益会累积起来，带来巨大的性能提升。</p>
+<h2 id="2-数据布局的重要性aos-vs-soa"><a class="header" href="#2-数据布局的重要性aos-vs-soa">2. 数据布局的重要性：AoS vs. SoA</a></h2>
+<p>SIMD 的效率高度依赖于数据在内存中的布局方式。考虑一个物理引擎，我们需要对N个刚体的状态进行积分。</p>
+<p><strong>AoS (Array of Structs) - 传统面向对象布局:</strong></p>
+<pre><code class="language-cpp">struct RigidBody {
+    Vector3 position;
+    Vector3 velocity;
+};
+RigidBody bodies[N];
+</code></pre>
+<p>在这种布局下，<code>bodies[0].position</code> 和 <code>bodies[1].position</code> 在内存中是不连续的，它们之间隔着 <code>velocity</code> 等其他数据。如果要对4个不同刚体的位置进行 SIMD 操作，CPU 需要从4个不连续的内存地址加载数据，这个过程被称为<strong>收集 (Gather)</strong>，效率很低。</p>
+<p><strong>SoA (Struct of Arrays) - 数据导向布局:</strong></p>
+<pre><code class="language-cpp">struct RigidBodies {
+    Vector3 positions[N];
+    Vector3 velocities[N];
+};
+</code></pre>
+<p>在这种布局下，所有刚体的位置都连续地存储在一起。当我们要对4个刚体的位置进行 SIMD 操作时，我们可以直接从内存中加载一个连续的块，这个块正好包含 <code>positions[0]</code>, <code>positions[1]</code>, <code>positions[2]</code>, <code>positions[3]</code> 的 <code>x, y, z</code> 分量。这种连续的内存访问模式对 CPU 的<strong>缓存</strong>和<strong>预取器</strong>极为友好，并且使得 SIMD 的数据加载操作效率极高。</p>
+<p><strong>结论：</strong> SoA 布局是释放 SIMD 全部潜力的关键。它将需要一起处理的数据在内存中排列在一起，完美地匹配了 SIMD 的工作方式。</p>
+<h2 id="3-在-c-中使用-simd内在函数-intrinsics"><a class="header" href="#3-在-c-中使用-simd内在函数-intrinsics">3. 在 C++ 中使用 SIMD：内在函数 (Intrinsics)</a></h2>
+<p>直接编写汇编语言来使用 SIMD 是非常困难且不可移植的。因此，编译器提供商（如 Intel, ARM）提供了一种更高层次的抽象：<strong>内在函数 (Intrinsics)</strong>。</p>
+<ul>
+<li><strong>什么是内在函数？</strong> 它们看起来像普通的 C++ 函数，但编译器会将它们直接翻译成一条或几条特定的 SIMD 汇编指令。</li>
+<li><strong>示例 (SSE):</strong>
+<ul>
+<li><code>__m128</code>: 一种数据类型，代表一个128位的 SIMD 寄存器。</li>
+<li><code>_mm_load_ps(float* p)</code>: 从地址 <code>p</code> 加载4个 float 到一个 <code>__m128</code> 寄存器中（地址必须16字节对齐）。</li>
+<li><code>_mm_add_ps(__m128 a, __m128 b)</code>: 将两个寄存器中的4对 float 分别相加。</li>
+<li><code>_mm_mul_ps(__m128 a, __m128 b)</code>: 乘法。</li>
+<li><code>_mm_sub_ps(__m128 a, __m128 b)</code>: 减法。</li>
+<li><code>_mm_store_ps(float* p, __m128 a)</code>: 将寄存器 <code>a</code> 中的4个 float 存回地址 <code>p</code>。</li>
+</ul>
+</li>
+</ul>
+<p>通过使用内在函数，开发者可以在 C++ 代码中直接利用 SIMD 的强大能力，同时将平台相关的汇编指令细节交给编译器处理。</p>
+<h2 id="4-物理引擎中的应用场景"><a class="header" href="#4-物理引擎中的应用场景">4. 物理引擎中的应用场景</a></h2>
+<ul>
+<li><strong>向量/矩阵运算：</strong> 几乎所有的3D向量和4x4矩阵运算（加、减、点积、叉积、矩阵-向量乘法、矩阵-矩阵乘法）都可以被 SIMD 大幅加速。</li>
+<li><strong>积分：</strong> 在积分阶段，更新N个刚体的位置和速度 <code>(pos += vel * dt)</code> 是一个完美的数据并行 SIMD 任务。</li>
+<li><strong>AABB 计算：</strong> 在宽相中，计算变换后模型的轴对齐包围盒 (AABB) 也涉及到大量的向量和矩阵运算。</li>
+<li><strong>约束求解：</strong> 在求解器中，计算雅可比矩阵、应用冲量等步骤也包含大量的向量运算，可以从 SIMD 中受益。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="物理系统与游戏引擎集成"><a class="header" href="#物理系统与游戏引擎集成">物理系统与游戏引擎集成</a></h1>
+<h2 id="核心问题-6"><a class="header" href="#核心问题-6">核心问题</a></h2>
+<p>物理引擎本身只是一个“黑盒子”，我们如何将它无缝地嵌入到真正的游戏引擎中？如何为游戏逻辑开发者提供一套友好、易用且功能强大的API？如何构建必要的工具，来观察、调试和分析这个看不见的物理世界？</p>
+<h2 id="学习目标-6"><a class="header" href="#学习目标-6">学习目标</a></h2>
+<p>学完本章后，您将能够：</p>
+<ul>
+<li>设计一套用于调试物理世界的“可视化绘制”系统。</li>
+<li>实现游戏逻辑最常用的场景查询功能，如射线检测（Raycasting）。</li>
+<li>解释在网络游戏中同步物理状态时面临的主要挑战和策略。</li>
+<li>创建物理材质（Physics Material）系统，用于定义物体的摩擦力和弹性。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="高级物理模拟"><a class="header" href="#高级物理模拟">高级物理模拟</a></h1>
+<h2 id="核心问题-7"><a class="header" href="#核心问题-7">核心问题</a></h2>
+<p>真实世界远比刚体要丰富多彩。我们如何模拟那些柔软、可变形的物体，比如旗帜、橡皮泥？我们又该如何模拟流动的液体？是否存在不同于传统“基于力”的模拟思路，来更直观、更稳定地处理这些复杂现象？</p>
+<h2 id="学习目标-7"><a class="header" href="#学习目标-7">学习目标</a></h2>
+<p>学完本章后，您将能够：</p>
+<ul>
+<li>解释“基于位置的动力学”（PBD）与传统“基于力”的方法的核心区别。</li>
+<li>实现一个简单的PBD距离约束，用于模拟弹簧或布料纤维。</li>
+<li>描述柔体模拟（Soft Body）的基本思想和挑战。</li>
+<li>理解基于粒子法的流体模拟（如SPH）的基本原理。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="附录"><a class="header" href="#附录">附录</a></h1>
+<p>这里提供一些详细的公式推导、有用的参考资料等。</p>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="术语表"><a class="header" href="#术语表">术语表</a></h1>
+<ul>
+<li><strong>AABB (Axis-Aligned Bounding Box)</strong>: 轴对齐包围盒。一个所有面都与世界坐标系坐标轴平行的长方体，常用于宽相碰撞检测。</li>
+<li><strong>CCD (Continuous Collision Detection)</strong>: 连续碰撞检测。一种用于防止高速或小型物体“隧穿”薄障碍物的碰撞检测技术。</li>
+<li><strong>Constraint</strong>: 约束。一个描述系统状态（位置或速度）应满足的几何或物理条件的方程。碰撞、关节等都被抽象为约束。</li>
+<li><strong>DCD (Discrete Collision Detection)</strong>: 离散碰撞检测。在离散的时间步长对物体进行重叠检查的碰撞检测方法。</li>
+<li><strong>DOF (Degrees of Freedom)</strong>: 自由度。一个物体可以在空间中独立运动的方式的数量。在3D空间中，一个自由刚体有6个自由度（3个平移，3个旋转）。</li>
+<li><strong>DOD (Data-Oriented Design)</strong>: 面向数据的设计。一种软件设计范式，强调将数据根据其处理方式进行组织，以最大化缓存效率。</li>
+<li><strong>ECS (Entity Component System)</strong>: 实体组件系统。一种软件架构模式，将数据（组件）与逻辑（系统）分离，是DOTS的核心。</li>
+<li><strong>FEM (Finite Element Method)</strong>: 有限元方法。一种源于工程领域的、物理上精确的模拟可形变对象的方法。</li>
+<li><strong>GJK (Gilbert-Johnson-Keerthi)</strong>: 一种高效的算法，用于检测两个凸体之间的距离或是否发生碰撞。</li>
+<li><strong>Impulse</strong>: 冲量。力在时间上的积分，它直接导致物体动量的改变。在物理引擎中用于模拟碰撞和约束响应。</li>
+<li><strong>Inertia Tensor</strong>: 转动惯量。一个3x3矩阵，描述了物体质量围绕其质心的分布，衡量其旋转惯性的大小。</li>
+<li><strong>Island</strong>: 孤岛。在物理模拟中，由接触和关节连接起来的一组相互作用的物体。不同孤岛之间的计算可以并行处理。</li>
+<li><strong>PBD (Position Based Dynamics)</strong>: 基于位置的动力学。一种非常稳定和可控的模拟方法，通过直接修改位置来满足约束，常用于软体和布料模拟。</li>
+<li><strong>PPU (Physics Processing Unit)</strong>: 物理处理器。一种专用于执行物理计算的硬件加速器，是NVIDIA PhysX的前身。</li>
+<li><strong>Restitution</strong>: 恢复系数。一个衡量碰撞“弹性”的系数，值为1时为完全弹性碰撞，为0时为完全非弹性碰撞。</li>
+<li><strong>Rigid Body</strong>: 刚体。一种理想化的物理模型，假设物体在受力时不会发生任何形变。</li>
+<li><strong>SAT (Separating Axis Theorem)</strong>: 分离轴定理。一种用于检测两个凸体是否碰撞的算法，其原理是寻找一个能将两个物体投影分开的轴。</li>
+<li><strong>SIMD (Single Instruction, Multiple Data)</strong>: 单指令多数据流。一种并行计算技术，允许CPU用一条指令同时对多个数据执行相同的操作。</li>
+<li><strong>Solver</strong>: 求解器。物理引擎的核心组件，负责计算并施加冲量，以同时满足场景中所有的约束。</li>
+<li><strong>SPH (Smoothed Particle Hydrodynamics)</strong>: 光滑粒子流体动力学。一种基于粒子的、用于模拟流体现象的拉格朗日方法。</li>
+<li><strong>Tunneling</strong>: 隧道效应。在离散碰撞检测中，高速或小型物体在一个时间步内完全穿过另一个薄物体现象。</li>
+<li><strong>Warm Starting</strong>: 热启动。一种优化技术，求解器利用上一帧的计算结果（如累积冲量）作为当前帧的初始值，以加速收敛。</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="参考文献"><a class="header" href="#参考文献">参考文献</a></h1>
 <h2 id="推荐书籍"><a class="header" href="#推荐书籍">推荐书籍</a></h2>
 <ol>
@@ -700,19 +992,51 @@ int btDiscreteDynamicsWorld::stepSimulation(btScalar timeStep, int maxSubSteps, 
 <p><strong>《Mathematics for 3D Game Programming and Computer Graphics》</strong> by Eric Lengyel
 一本优秀的数学参考书，涵盖了 3D 游戏编程所需的线性代数、几何学、微积分等。对于理解物理引擎背后的数学原理非常有帮助。</p>
 </li>
+<li>
+<p><strong>“Physics-Based Animation” by Kenny Erleben et al.</strong>: 一本非常全面的学术著作，深入探讨了刚体、可形变物体、流体模拟背后的数学和物理原理。</p>
+</li>
 </ol>
-<h2 id="推荐视频课程"><a class="header" href="#推荐视频课程">推荐视频课程</a></h2>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="在线资源"><a href="#在线资源" class="header">在线资源</a></h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h2 id="推荐资源"><a class="header" href="#推荐资源">推荐资源</a></h2>
 <ol>
 <li>NVIDA和PBD作者Matthias的Youtube专题<a href="https://www.youtube.com/@TenMinutePhysics">Ten Minute Physics</a>.</li>
 <li>Pikuma的<a href="https://pikuma.com/courses/game-physics-engine-programming">2D Game Physics Programming课程</a>.</li>
+<li>Box2D的作者：Erin Catto，在box2D上的PPT资源和油管上分享的GDC演讲。</li>
+<li>Bullet作者：Erwin Coumans的演讲和PPT。</li>
+<li>基于物理动画的资源汇总：https://www.physicsbasedanimation.com/</li>
 </ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="经典文献"><a href="#经典文献" class="header">经典文献</a></h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h2 id="推荐文献"><a class="header" href="#推荐文献">推荐文献</a></h2>
 <ol>
 <li><strong>“Position Based Dynamics”</strong> by Matthias Müller, Bruno Heidelberger, Marcus Hennix, John Ratcliff (VRIPHYS 2007)</li>
 <li><strong>“Extended Position Based Dynamics”</strong> by Jan Bender, Matthias Müller, Miles Macklin (SIGGRAPH Asia 2014)</li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-<h1 id="game-dev"><a class="header" href="#game-dev">Game Dev</a></h1>
+<h1 id="开源引擎"><a class="header" href="#开源引擎">开源引擎</a></h1>
+<ul>
+<li><strong>Box2D</strong>: <a href="https://github.com/erincatto/box2d">https://github.com/erincatto/box2d</a>
+<ul>
+<li>代码小巧、优雅、注释清晰，是学习约束求解器和CCD实现的典范。</li>
+</ul>
+</li>
+<li><strong>Bullet Physics</strong>: <a href="https://github.com/bulletphysics/bullet3">https://github.com/bulletphysics/bullet3</a>
+<ul>
+<li>代码库庞大，功能全面，可以学习到模块化引擎设计和各种高级功能的实现。</li>
+</ul>
+</li>
+<li><strong>Jolt Physics</strong>: <a href="https://github.com/jrouwe/JoltPhysics">https://github.com/jrouwe/JoltPhysics</a>
+<ul>
+<li>现代C++和面向数据设计的杰出代表，是学习高性能、并行化物理引擎实现的最佳范例。</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="游戏开发技术"><a href="#游戏开发技术" class="header">游戏开发技术</a></h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="混合现实mr游戏开发入门"><a class="header" href="#混合现实mr游戏开发入门">混合现实（MR）游戏开发入门</a></h1>
 <p>近年来，虚拟现实（VR）、增强现实（AR）和混合现实（MR）技术的迅速崛起，推动了游戏开发进入全新的维度。作为一名VR/MR游戏开发者，我亲眼见证了技术的不断进步与升级。从微软第一代HoloLens头显到HTC Vive，再到Quest、Quest 2，直到如今为Meta Quest 3开发游戏，我深刻感受到了这些技术如何颠覆传统2D和3D视觉表现，并重新定义了游戏的交互方式和沉浸感体验。</p>
@@ -1412,6 +1736,9 @@ MyActor-&gt;OnScoreChanged.RemoveDynamic(this, &amp;UMyComponent::HandleScore);
 <p><img src="gameDevelopment/PBR_workflow/images/cgSoftware.webp" alt=""></p>
 <h2 id="结语"><a class="header" href="#结语">结语</a></h2>
 <p>3D建模是一项结合技术与艺术的技能，从构思到呈现的每个步骤都充满挑战与创意。希望这篇文章能为你的学习旅程提供有用的指导。无论你是初学者还是有经验的创作者，保持好奇心、持续实践，并总结经验，都会帮助你不断进步。每一次挑战都带来新的成长，期待你在3D建模的世界中，创造出属于自己的精彩作品。</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="软件工具箱"><a href="#软件工具箱" class="header">软件工具箱</a></h1>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="mdbook写作和发布流程"><a class="header" href="#mdbook写作和发布流程">mdbook写作和发布流程</a></h1>
 <p>本文旨在为技术作者，特别是物理引擎、图形学、科学计算等领域的开发者，提供一套完整、高效且自动化的技术文档解决方案。之前，我尝试过多种方法，都会出现各种各样问题，耗费大量时间解决工具格式兼容问题。最后，我总结这套整合 mdBook、KaTeX 插件和 GitHub Pages，构建一个从内容撰写到网站部署的无缝工作流。</p>
@@ -1658,6 +1985,90 @@ vcpkg提供两种管理模式：</li>
 </ol>
 <h2 id="参考文献-2"><a class="header" href="#参考文献-2">参考文献</a></h2>
 <p>[1] https://vcpkg.io/en/</p>
+<div style="break-before: page; page-break-before: always;"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="用-emscripten-在浏览器中展示一个-c-引擎"><a class="header" href="#用-emscripten-在浏览器中展示一个-c-引擎">用 Emscripten 在浏览器中展示一个 C++ 引擎</a></h1>
+<h2 id="为什么我要把引擎搬到浏览器中"><a class="header" href="#为什么我要把引擎搬到浏览器中">为什么我要把引擎搬到浏览器中</a></h2>
+<p>对于引擎开发者来说，“如何展示你的工作成果”本身就是一个工程问题。传统方式通常只有三种：录屏视频、截图、分享Demo程序。这些方式都有明显问题：视频无法交互，截图无法验证，Demo需要环境配置。</p>
+<p>而浏览器具备一个独特优势：它是几乎所有读者，同行都能“立刻运行”的平台。如果一个物理引擎Demo能在浏览器里直接跑起来，那么它的可信度、完成度和技术深度，都会被立刻感知。这正是我选择Emscripten + WebAssembly的原因。</p>
+<h2 id="emscripten运行原理"><a class="header" href="#emscripten运行原理">Emscripten运行原理</a></h2>
+<p>一般物理引擎是用C++语言编写，可以在Windows、Mac、Linux 上能运行，无法直接在浏览器中运行。通过Emscripten工具链，可以把C++代码翻译成浏览器能理解的语言（WASM或asm.js）。同时，提供一些“适配工具”，帮浏览器运行一些在电脑上才有的功能（比如文件读写、窗口绘制、键盘鼠标输入）。编译完成后，直接打开<code>.html</code>文件就可以运行，非常方便。</p>
+<h2 id="emscripten的安装配置"><a class="header" href="#emscripten的安装配置">Emscripten的安装配置</a></h2>
+<ol>
+<li>下载Emsdk项目。</li>
+</ol>
+<pre><code class="language-Bash">git clone https://github.com/emscripten-core/emsdk.git
+cd emsdk
+</code></pre>
+<ol start="2">
+<li>安装 Emscripten,更新到最新。</li>
+</ol>
+<pre><code class="language-Bash">emsdk install latest
+emsdk activate latest
+</code></pre>
+<ol start="3">
+<li>配置环境变量。</li>
+</ol>
+<pre><code class="language-Bash">// 仅当前终端有效
+emsdk_env.bat
+// 永久生效
+emsdk activate latest --permanent
+</code></pre>
+<ol start="4">
+<li>验证是否成功</li>
+</ol>
+<pre><code class="language-Bash">emcc -v
+emcmake --version
+</code></pre>
+<h2 id="安装ninjia和cmake"><a class="header" href="#安装ninjia和cmake">安装Ninjia和CMake</a></h2>
+<ol>
+<li>通过命令安装Ninjia：</li>
+</ol>
+<pre><code class="language-Bash">winget install Ninja-build.Ninja
+</code></pre>
+<p>卸载：</p>
+<pre><code class="language-Bash">winget uninstall Ninja-build.Ninja
+</code></pre>
+<ol start="2">
+<li>验证是否安装成功：</li>
+</ol>
+<pre><code class="language-Bash">ninja --version
+</code></pre>
+<ol start="3">
+<li>CMake下载地址：https://cmake.org/</li>
+</ol>
+<h2 id="cmakeliststxt配置"><a class="header" href="#cmakeliststxt配置">CMakeLists.txt配置</a></h2>
+<p>如果需要部署到Github Page上，需要主页为index.html。</p>
+<pre><code class="language-Bash">if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+            OUTPUT_NAME "index"
+            SUFFIX ".html"
+    )
+
+    target_link_options(${PROJECT_NAME} PRIVATE
+            -O3
+            -sUSE_SDL=2
+            -sUSE_WEBGL2=1
+            -sALLOW_MEMORY_GROWTH=1
+            -sLEGACY_GL_EMULATION=1 // ？是否可以关闭
+            --shell-file=${CMAKE_SOURCE_DIR}/source/shell.html
+    )
+    ...
+endif()
+</code></pre>
+<h2 id="编译"><a class="header" href="#编译">编译</a></h2>
+<p>创建一个文件夹，然后编译的结果放在build-web中。</p>
+<pre><code>mkdir build-web
+cd build-web
+emcmake cmake .. -G Ninja
+ninja
+</code></pre>
+<h2 id="github-page部署"><a class="header" href="#github-page部署">Github Page部署</a></h2>
+<ol>
+<li>新建一个新仓库PhysicsEngineWeb。</li>
+<li>上传build-web的代码到根目录</li>
+<li>启用Github Page，配置目录位置到根目录。</li>
+<li>自动部署后，使用https://XXX.github.io/PhysicsEngineWeb进行展示。</li>
+</ol>
 
                     </main>
 

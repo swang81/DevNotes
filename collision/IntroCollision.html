@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-9ab0a0ee.js";
+            window.path_to_searchindex_js = "../searchindex-241add65.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-71bd4c3d.js"></script>
+        <script src="../toc-507ab2b0.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -176,15 +176,23 @@
                     <main>
                         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
 <h1 id="碰撞检测"><a class="header" href="#碰撞检测">碰撞检测</a></h1>
-<p>碰撞检测主要解决的问题是：场景中的哪些物体在何时、何地、以何种方式发生了接触？</p>
-<p>想象一下：在一个包含N个物体的场景中，潜在的碰撞对有 <code>N*(N-1)/2</code> 个，即 <code>O(N²)</code> 的复杂度。对于一个拥有数千个物体的现代游戏场景，每秒进行60次这样的暴力检查是完全不可行的。</p>
-<p>本章将介绍现代物理引擎如何通过一个多阶段的碰撞检测管线（Collision Detection Pipeline）来智能地解决这个问题。</p>
+<h2 id="核心问题"><a class="header" href="#核心问题">核心问题</a></h2>
+<p>在一个成千上万个物体构成的复杂虚拟世界里，我们如何快速找出哪些物体碰在了一起？对于那些碰在一起的物体，我们又如何精确地计算出它们接触的深度、方向和具体位置？</p>
+<h2 id="学习目标"><a class="header" href="#学习目标">学习目标</a></h2>
+<p>学完本章后，您将能够：</p>
+<ul>
+<li>区分Broadphase 和 Narrowphase 的功能和目的。</li>
+<li>实现一个基于AABB树（如DBVT）的Broadphase系统，用于快速筛选碰撞对。</li>
+<li>解释GJK/EPA 算法的核心思想，并用它来检测凸体间的精确碰撞。</li>
+<li>生成包含接触点、法线、穿透深度的接触流形（Contact Manifold）。</li>
+<li>理解连续碰撞检测（CCD）对于解决“子弹穿纸”问题的重要性。</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../simulationLoop/BulletEngineSimulationLoop.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../rigidSimulation/IntroRigidSimulation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
@@ -198,7 +206,7 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../simulationLoop/BulletEngineSimulationLoop.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../rigidSimulation/IntroRigidSimulation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 

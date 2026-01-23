@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>游戏开发技术 - Game Physics &amp; Development Notes</title>
+        <title>SIMD优化 - Game Physics &amp; Development Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-9ab0a0ee.js";
+            window.path_to_searchindex_js = "../searchindex-241add65.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-71bd4c3d.js"></script>
+        <script src="../toc-507ab2b0.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -175,17 +175,88 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-<h1 id="game-dev"><a class="header" href="#game-dev">Game Dev</a></h1>
+<h1 id="simd"><a class="header" href="#simd">SIMD</a></h1>
+<p>在追求极致性能的道路上，多线程利用了“更多”的核心，而 <strong>SIMD (Single Instruction, Multiple Data)</strong> 技术则致力于榨干“每个”核心的计算潜力。SIMD 是一种并行计算的形式，但它发生在比多线程更低的硬件层面上。现代 CPU 的寄存器（CPU内部最快的数据存储单元）通常是128位、256位甚至512位宽，而一个标准的单精度浮点数（float）只有32位。这意味着一个128位的寄存器可以同时容纳4个浮点数。SIMD 指令集（如 Intel 的 SSE/AVX 或 ARM 的 NEON）允许我们用<strong>一条指令</strong>，对这4个浮点数<strong>同时</strong>执行相同的操作（如加法、乘法）。在物理引擎中，充斥着大量对3D向量和4x4矩阵的运算，这使其成为应用 SIMD 优化的完美场景。通过将数据打包并使用 SIMD 指令，我们可以获得数倍的性能提升。</p>
+<h2 id="1-simd-的核心概念"><a class="header" href="#1-simd-的核心概念">1. SIMD 的核心概念</a></h2>
+<p>想象一下，你需要计算两个3D向量的和：<code>c = a + b</code>。</p>
+<p><strong>传统（标量）做法：</strong></p>
+<pre><code class="language-cpp">struct Vector3 { float x, y, z; };
+Vector3 a, b, c;
+// ...
+c.x = a.x + b.x; // 1次加法
+c.y = a.y + b.y; // 1次加法
+c.z = a.z + b.z; // 1次加法
+// 总共需要 3 条独立的加法指令
+</code></pre>
+<p><strong>SIMD 做法：</strong>
+假设我们使用128位的 SIMD 寄存器（可以容纳4个 float）。</p>
+<ol>
+<li>
+<p><strong>数据加载 (Load):</strong> 将向量 <code>a</code> 和 <code>b</code> 的分量加载到 SIMD 寄存器中。由于向量只有3个分量，我们通常会将第4个分量（w）置为0。
+<code>__m128 reg_a = _mm_set_ps(0.0f, a.z, a.y, a.x);</code>
+<code>__m128 reg_b = _mm_set_ps(0.0f, b.z, b.y, b.x);</code></p>
+</li>
+<li>
+<p><strong>SIMD 加法 (Add):</strong> 使用一条 SIMD 加法指令，对两个寄存器中的4对浮点数同时进行加法运算。
+<code>__m128 reg_c = _mm_add_ps(reg_a, reg_b);</code></p>
+</li>
+<li>
+<p><strong>数据存储 (Store):</strong> 将结果从 SIMD 寄存器中存回内存。
+<code>_mm_store_ps(&amp;c.x, reg_c);</code></p>
+</li>
+</ol>
+<p>在这个例子中，我们用<strong>一条</strong> <code>_mm_add_ps</code> 指令完成了原本需要3条指令的工作。虽然有数据加载和存储的开销，但在大量的连续计算中，这种收益会累积起来，带来巨大的性能提升。</p>
+<h2 id="2-数据布局的重要性aos-vs-soa"><a class="header" href="#2-数据布局的重要性aos-vs-soa">2. 数据布局的重要性：AoS vs. SoA</a></h2>
+<p>SIMD 的效率高度依赖于数据在内存中的布局方式。考虑一个物理引擎，我们需要对N个刚体的状态进行积分。</p>
+<p><strong>AoS (Array of Structs) - 传统面向对象布局:</strong></p>
+<pre><code class="language-cpp">struct RigidBody {
+    Vector3 position;
+    Vector3 velocity;
+};
+RigidBody bodies[N];
+</code></pre>
+<p>在这种布局下，<code>bodies[0].position</code> 和 <code>bodies[1].position</code> 在内存中是不连续的，它们之间隔着 <code>velocity</code> 等其他数据。如果要对4个不同刚体的位置进行 SIMD 操作，CPU 需要从4个不连续的内存地址加载数据，这个过程被称为<strong>收集 (Gather)</strong>，效率很低。</p>
+<p><strong>SoA (Struct of Arrays) - 数据导向布局:</strong></p>
+<pre><code class="language-cpp">struct RigidBodies {
+    Vector3 positions[N];
+    Vector3 velocities[N];
+};
+</code></pre>
+<p>在这种布局下，所有刚体的位置都连续地存储在一起。当我们要对4个刚体的位置进行 SIMD 操作时，我们可以直接从内存中加载一个连续的块，这个块正好包含 <code>positions[0]</code>, <code>positions[1]</code>, <code>positions[2]</code>, <code>positions[3]</code> 的 <code>x, y, z</code> 分量。这种连续的内存访问模式对 CPU 的<strong>缓存</strong>和<strong>预取器</strong>极为友好，并且使得 SIMD 的数据加载操作效率极高。</p>
+<p><strong>结论：</strong> SoA 布局是释放 SIMD 全部潜力的关键。它将需要一起处理的数据在内存中排列在一起，完美地匹配了 SIMD 的工作方式。</p>
+<h2 id="3-在-c-中使用-simd内在函数-intrinsics"><a class="header" href="#3-在-c-中使用-simd内在函数-intrinsics">3. 在 C++ 中使用 SIMD：内在函数 (Intrinsics)</a></h2>
+<p>直接编写汇编语言来使用 SIMD 是非常困难且不可移植的。因此，编译器提供商（如 Intel, ARM）提供了一种更高层次的抽象：<strong>内在函数 (Intrinsics)</strong>。</p>
+<ul>
+<li><strong>什么是内在函数？</strong> 它们看起来像普通的 C++ 函数，但编译器会将它们直接翻译成一条或几条特定的 SIMD 汇编指令。</li>
+<li><strong>示例 (SSE):</strong>
+<ul>
+<li><code>__m128</code>: 一种数据类型，代表一个128位的 SIMD 寄存器。</li>
+<li><code>_mm_load_ps(float* p)</code>: 从地址 <code>p</code> 加载4个 float 到一个 <code>__m128</code> 寄存器中（地址必须16字节对齐）。</li>
+<li><code>_mm_add_ps(__m128 a, __m128 b)</code>: 将两个寄存器中的4对 float 分别相加。</li>
+<li><code>_mm_mul_ps(__m128 a, __m128 b)</code>: 乘法。</li>
+<li><code>_mm_sub_ps(__m128 a, __m128 b)</code>: 减法。</li>
+<li><code>_mm_store_ps(float* p, __m128 a)</code>: 将寄存器 <code>a</code> 中的4个 float 存回地址 <code>p</code>。</li>
+</ul>
+</li>
+</ul>
+<p>通过使用内在函数，开发者可以在 C++ 代码中直接利用 SIMD 的强大能力，同时将平台相关的汇编指令细节交给编译器处理。</p>
+<h2 id="4-物理引擎中的应用场景"><a class="header" href="#4-物理引擎中的应用场景">4. 物理引擎中的应用场景</a></h2>
+<ul>
+<li><strong>向量/矩阵运算：</strong> 几乎所有的3D向量和4x4矩阵运算（加、减、点积、叉积、矩阵-向量乘法、矩阵-矩阵乘法）都可以被 SIMD 大幅加速。</li>
+<li><strong>积分：</strong> 在积分阶段，更新N个刚体的位置和速度 <code>(pos += vel * dt)</code> 是一个完美的数据并行 SIMD 任务。</li>
+<li><strong>AABB 计算：</strong> 在宽相中，计算变换后模型的轴对齐包围盒 (AABB) 也涉及到大量的向量和矩阵运算。</li>
+<li><strong>约束求解：</strong> 在求解器中，计算雅可比矩阵、应用冲量等步骤也包含大量的向量运算，可以从 SIMD 中受益。</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../appendix/referencesBooks.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../optimization/Pool.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../gameDevelopment/MR_game_development/MRgame.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../integration/IntroIntergartion.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -195,11 +266,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../appendix/referencesBooks.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../optimization/Pool.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../gameDevelopment/MR_game_development/MRgame.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../integration/IntroIntergartion.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
