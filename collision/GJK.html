@@ -15,7 +15,7 @@
         <link rel="icon" href="../favicon-de23e50b.svg">
         <link rel="shortcut icon" href="../favicon-8114d1fc.png">
         <link rel="stylesheet" href="../css/variables-af99728e.css">
-        <link rel="stylesheet" href="../css/general-5a2affe6.css">
+        <link rel="stylesheet" href="../css/general-4abed72c.css">
         <link rel="stylesheet" href="../css/chrome-ae938929.css">
         <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
 
@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-241add65.js";
+            window.path_to_searchindex_js = "../searchindex-a86b9dbc.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-507ab2b0.js"></script>
+        <script src="../toc-b39f288b.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -175,6 +175,114 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="gjk和epa"><a class="header" href="#gjk和epa">GJK和EPA</a></h1>
+<p>在窄相碰撞检测的武器库中，GJK (Gilbert-Johnson-Keerthi) 算法和 EPA (Expanding Polytope Algorithm) 算法无疑是最耀眼的双子星。GJK 负责高效地回答“是否碰撞？”这个问题，而 EPA 则在 GJK 确认碰撞后，接力计算出“碰撞得有多深？”以及“碰撞的方向是什么？”。这两个算法的组合，为现代物理引擎（如 Bullet, PhysX, Box2D）提供了一个极其强大、通用且高效的框架，用以处理任意凸体之间的碰撞检测和接触信息生成。</p>
+<h2 id="gjk高效的碰撞探测器"><a class="header" href="#gjk高效的碰撞探测器">GJK：高效的碰撞探测器</a></h2>
+<p>GJK 的核心任务是<strong>检测两个凸体 A 和 B 是否相交</strong>。它通过一个巧妙的转化，将这个问题变成了<strong>判断原点 O 是否位于闵可夫斯基差集 C = A - B 之中</strong>。</p>
+<h3 id="1-核心组件"><a class="header" href="#1-核心组件">1. 核心组件</a></h3>
+<ul>
+<li><strong>闵可夫斯基差集 (Minkowski Difference):</strong> <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">{</span><span class="mord mathnormal">a</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">b</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathnormal">a</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal">A</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">b</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mclose">}</span></span></span></span>。如果 <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal">A</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">∩</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.05017em;">B</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel"><span class="mrel"><span class="mord vbox"><span class="thinbox"><span class="rlap"><span class="strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="inner"><span class="mord"><span class="mrel"></span></span></span><span class="fix"></span></span></span></span></span><span class="mrel">=</span></span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8056em;vertical-align:-0.0556em;"></span><span class="mord">∅</span></span></span></span>，则 <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7224em;vertical-align:-0.0391em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.07153em;">C</span></span></span></span>。</li>
+<li><strong>支撑函数 (Support Function):</strong> <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2274em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0576em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">C</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9774em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">d</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.0688em;"><span class="overlay" style="height:0.714em;width:0.471em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.471em" height="0.714em" style="width:0.471em" viewbox="0 0 471 714" preserveaspectratio="xMinYMin"><path d="M377 20c0-5.333 1.833-10 5.5-14S391 0 397 0c4.667 0 8.667 1.667 12 5 3.333 2.667 6.667 9 10 19 6.667 24.667 20.333 43.667 41 57 7.333 4.667 11 10.667 11 18 0 6-1 10-3 12s-6.667 5-14 9c-28.667 14.667-53.667 35.667-75 63 -1.333 1.333-3.167 3.5-5.5 6.5s-4 4.833-5 5.5c-1 .667-2.5 1.333-4.5 2s-4.333 1 -7 1c-4.667 0-9.167-1.833-13.5-5.5S337 184 337 178c0-12.667 15.667-32.333 47-59 H213l-171-1c-8.667-6-13-12.333-13-19 0-4.667 4.333-11.333 13-20h359 c-16-25.333-24-45-24-59z" /></svg></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span> 返回差集 C 在方向 <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.9774em;"></span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9774em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">d</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.0688em;"><span class="overlay" style="height:0.714em;width:0.471em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.471em" height="0.714em" style="width:0.471em" viewbox="0 0 471 714" preserveaspectratio="xMinYMin"><path d="M377 20c0-5.333 1.833-10 5.5-14S391 0 397 0c4.667 0 8.667 1.667 12 5 3.333 2.667 6.667 9 10 19 6.667 24.667 20.333 43.667 41 57 7.333 4.667 11 10.667 11 18 0 6-1 10-3 12s-6.667 5-14 9c-28.667 14.667-53.667 35.667-75 63 -1.333 1.333-3.167 3.5-5.5 6.5s-4 4.833-5 5.5c-1 .667-2.5 1.333-4.5 2s-4.333 1 -7 1c-4.667 0-9.167-1.833-13.5-5.5S337 184 337 178c0-12.667 15.667-32.333 47-59 H213l-171-1c-8.667-6-13-12.333-13-19 0-4.667 4.333-11.333 13-20h359 c-16-25.333-24-45-24-59z" /></svg></span></span></span></span></span></span></span></span></span></span> 上最远的点。<span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.2274em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0576em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.07153em;">C</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9774em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">d</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.0688em;"><span class="overlay" style="height:0.714em;width:0.471em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.471em" height="0.714em" style="width:0.471em" viewbox="0 0 471 714" preserveaspectratio="xMinYMin"><path d="M377 20c0-5.333 1.833-10 5.5-14S391 0 397 0c4.667 0 8.667 1.667 12 5 3.333 2.667 6.667 9 10 19 6.667 24.667 20.333 43.667 41 57 7.333 4.667 11 10.667 11 18 0 6-1 10-3 12s-6.667 5-14 9c-28.667 14.667-53.667 35.667-75 63 -1.333 1.333-3.167 3.5-5.5 6.5s-4 4.833-5 5.5c-1 .667-2.5 1.333-4.5 2s-4.333 1 -7 1c-4.667 0-9.167-1.833-13.5-5.5S337 184 337 178c0-12.667 15.667-32.333 47-59 H213l-171-1c-8.667-6-13-12.333-13-19 0-4.667 4.333-11.333 13-20h359 c-16-25.333-24-45-24-59z" /></svg></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:1.2274em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0576em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight">A</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9774em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">d</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.0688em;"><span class="overlay" style="height:0.714em;width:0.471em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.471em" height="0.714em" style="width:0.471em" viewbox="0 0 471 714" preserveaspectratio="xMinYMin"><path d="M377 20c0-5.333 1.833-10 5.5-14S391 0 397 0c4.667 0 8.667 1.667 12 5 3.333 2.667 6.667 9 10 19 6.667 24.667 20.333 43.667 41 57 7.333 4.667 11 10.667 11 18 0 6-1 10-3 12s-6.667 5-14 9c-28.667 14.667-53.667 35.667-75 63 -1.333 1.333-3.167 3.5-5.5 6.5s-4 4.833-5 5.5c-1 .667-2.5 1.333-4.5 2s-4.333 1 -7 1c-4.667 0-9.167-1.833-13.5-5.5S337 184 337 178c0-12.667 15.667-32.333 47-59 H213l-171-1c-8.667-6-13-12.333-13-19 0-4.667 4.333-11.333 13-20h359 c-16-25.333-24-45-24-59z" /></svg></span></span></span></span></span></span></span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:1.2274em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.05764em;">S</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3283em;"><span style="top:-2.55em;margin-left:-0.0576em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathnormal mtight" style="margin-right:0.05017em;">B</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord">−</span><span class="mord accent"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.9774em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord mathnormal">d</span></span><span style="top:-3.2634em;"><span class="pstrut" style="height:3em;"></span><span class="accent-body" style="left:-0.0688em;"><span class="overlay" style="height:0.714em;width:0.471em;"><svg xmlns="http://www.w3.org/2000/svg" width="0.471em" height="0.714em" style="width:0.471em" viewbox="0 0 471 714" preserveaspectratio="xMinYMin"><path d="M377 20c0-5.333 1.833-10 5.5-14S391 0 397 0c4.667 0 8.667 1.667 12 5 3.333 2.667 6.667 9 10 19 6.667 24.667 20.333 43.667 41 57 7.333 4.667 11 10.667 11 18 0 6-1 10-3 12s-6.667 5-14 9c-28.667 14.667-53.667 35.667-75 63 -1.333 1.333-3.167 3.5-5.5 6.5s-4 4.833-5 5.5c-1 .667-2.5 1.333-4.5 2s-4.333 1 -7 1c-4.667 0-9.167-1.833-13.5-5.5S337 184 337 178c0-12.667 15.667-32.333 47-59 H213l-171-1c-8.667-6-13-12.333-13-19 0-4.667 4.333-11.333 13-20h359 c-16-25.333-24-45-24-59z" /></svg></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。</li>
+<li><strong>单纯形 (Simplex):</strong> 算法在迭代过程中维护的一个点集，这些点都位于差集 C 中。在3D空间中，单纯形可以是点（0-simplex）、线段（1-simplex）、三角形（2-simplex）或四面体（3-simplex）。我们的目标是构建一个包含原点的单纯形。</li>
+</ul>
+<h3 id="2-gjk-算法流程"><a class="header" href="#2-gjk-算法流程">2. GJK 算法流程</a></h3>
+<p>GJK 是一个迭代算法，它不断地构建一个越来越“接近”原点的单纯形。</p>
+<ol>
+<li>
+<p><strong>初始化:</strong></p>
+<ul>
+<li>创建一个空的单纯形 <code>simplex</code>。</li>
+<li>随机选择一个初始方向 <code>d</code> (例如, <code>(1, 0, 0)</code>)。</li>
+<li>计算第一个支撑点 <code>a = support(d)</code>，并将其加入 <code>simplex</code>。</li>
+<li>更新方向 <code>d</code> 为指向原点的方向，即 <code>d = -a</code>。</li>
+</ul>
+</li>
+<li>
+<p><strong>主循环:</strong>
+a. 计算新方向上的支撑点 <code>a = support(d)</code>。
+b. <strong>终止条件1 (不碰撞):</strong> 如果 <code>a</code> 沿 <code>d</code> 方向没有越过原点（即 <code>a.dot(d) &lt; 0</code>），说明原点不可能被 C 包围。A 和 B <strong>没有碰撞</strong>，算法结束。
+c. 将 <code>a</code> 加入 <code>simplex</code>。
+d. <strong>核心步骤 <code>doSimplex</code>:</strong> 根据 <code>simplex</code> 的类型（线段、三角形、四面体），判断原点是否被包含，并更新单纯形和新方向 <code>d</code>。
+-   如果 <code>doSimplex</code> 返回 <code>true</code>，说明单纯形包含了原点。A 和 B <strong>发生碰撞</strong>，算法结束，并将最终的单纯形传递给 EPA。
+-   如果 <code>doSimplex</code> 返回 <code>false</code>，它会更新 <code>simplex</code>（移除不需要的点）和 <code>d</code>（指向原点的最近方向），然后继续下一次循环。</p>
+</li>
+</ol>
+<p><strong><code>doSimplex</code> 的几何直觉:</strong></p>
+<ul>
+<li><strong>线段情况 (2个点):</strong> 检查原点是否在线段所在的 Voronoi 区域内。更新方向 <code>d</code> 为垂直于线段且指向原点的方向。</li>
+<li><strong>三角形情况 (3个点):</strong> 检查原点是在三角形内部，还是在某条边的外部，或某个顶点的外部。更新方向 <code>d</code> 为垂直于三角形平面或某条边且指向原点的方向。</li>
+<li><strong>四面体情况 (4个点):</strong> 检查原点是否在四面体内部。如果是，则碰撞！如果不是，找到离原点最近的面，更新方向 <code>d</code> 为该面的法线方向，并用这个面（三角形）作为新的单纯形。</li>
+</ul>
+<p><strong>代码示例 (GJK 主循环伪代码):</strong></p>
+<pre><code class="language-cpp">bool gjk(const Shape&amp; A, const Shape&amp; B, Simplex&amp; out_simplex) {
+    Vector3 d = Vector3(1, 0, 0); // Initial direction
+    Simplex simplex;
+    simplex.add(support(A, B, d));
+    d = -simplex.getLastPoint();
+
+    while (true) {
+        Vector3 a = support(A, B, d);
+        if (a.dot(d) &lt; 0) {
+            return false; // No collision
+        }
+        simplex.add(a);
+        if (doSimplex(simplex, d)) {
+            out_simplex = simplex;
+            return true; // Collision
+        }
+    }
+}
+</code></pre>
+<hr>
+<h2 id="epa精确的穿透计算器"><a class="header" href="#epa精确的穿透计算器">EPA：精确的穿透计算器</a></h2>
+<p>GJK 算法在返回 <code>true</code> 时，只告诉我们发生了碰撞，并提供了一个包含原点的四面体。它没有告诉我们穿透的深度和方向。这时，EPA 算法接管工作。</p>
+<h3 id="1-核心思想"><a class="header" href="#1-核心思想">1. 核心思想</a></h3>
+<p>EPA 的出发点是 GJK 结束时得到的包含原点的单纯形（一个凸多面体）。既然原点在内部，那么这个多面体到原点的<strong>最小距离</strong>，就对应了两个原始物体之间的<strong>最小穿透深度</strong>。</p>
+<p>EPA 是一个迭代算法，它从初始的单纯形（通常是四面体）开始，不断地“扩展”这个多面体，直到找到距离原点最近的那个面。</p>
+<h3 id="2-epa-算法流程"><a class="header" href="#2-epa-算法流程">2. EPA 算法流程</a></h3>
+<ol>
+<li>
+<p><strong>初始化:</strong></p>
+<ul>
+<li>从 GJK 提供的包含原点的单纯形（四面体）开始，构建一个初始的凸多面体（polytope）。这个多面体由面（三角形）、边和顶点组成。</li>
+</ul>
+</li>
+<li>
+<p><strong>主循环:</strong>
+a. <strong>找到最近的面:</strong> 在当前多面体的所有面中，找到距离原点最近的那个面。记录该面的法线 <code>n</code> 和到原点的距离 <code>dist</code>。
+b. <strong>扩展多面体:</strong> 在该最近面的法线方向 <code>n</code> 上，计算一个新的支撑点 <code>p = support(n)</code>。
+c. <strong>终止条件:</strong> 计算 <code>p</code> 在 <code>n</code> 方向上的投影距离 <code>p.dot(n)</code>。如果这个距离与 <code>dist</code> 的差值非常小（<code>p.dot(n) - dist &lt; tolerance</code>），说明我们无法在 <code>n</code> 方向上进一步扩展多面体了。我们已经找到了最接近原点的面。算法结束，返回 <code>dist</code> 作为<strong>穿透深度</strong>，<code>n</code> 作为<strong>接触法线</strong>。
+d. <strong>重建多面体:</strong> 如果没有终止，说明 <code>p</code> 是一个新的、更远的点。我们需要将 <code>p</code> 加入多面体，并重建它。这通常涉及到删除所有 <code>p</code> 点可见的面，然后用 <code>p</code> 和被删除面的轮廓边构建新的三角面。</p>
+</li>
+</ol>
+<p><strong>代码示例 (EPA 主循环伪代码):</strong></p>
+<pre><code class="language-cpp">PenetrationInfo epa(const Shape&amp; A, const Shape&amp; B, Simplex&amp; initial_simplex) {
+    Polytope polytope(initial_simplex);
+
+    while (true) {
+        // 1. 找到距离原点最近的面
+        Face closestFace = polytope.findClosestFaceToOrigin();
+        Vector3 normal = closestFace.normal;
+        float distance = closestFace.distance;
+
+        // 2. 在法线方向上获取新的支撑点
+        Vector3 p = support(A, B, normal);
+
+        // 3. 检查是否可以继续扩展
+        if (p.dot(normal) - distance &lt; 0.0001f) {
+            // 无法扩展，找到最小穿透向量
+            return {normal, distance};
+        }
+
+        // 4. 扩展多面体（最复杂的部分）
+        polytope.expand(p);
+    }
+}
+</code></pre>
+<hr>
+<h2 id="总结"><a class="header" href="#总结">总结</a></h2>
+<p>GJK 和 EPA 是一对天作之合。GJK 像一个快速的侦察兵，利用闵可夫斯基差集的巧妙思想，高效地判断两个凸体是否可能接触。一旦发现接触，它立即将“战场”（一个包含原点的初始单纯形）交给 EPA。EPA 则像一个精密的工兵，从这个初始阵地出发，通过迭代扩展，精确地测量出穿透的深度和方向，为后续的碰撞响应提供至关重要的接触信息。</p>
+<p>这个组合的强大之处在于其<strong>通用性</strong>和<strong>效率</strong>。通过 <code>support</code> 函数的抽象，它们可以统一处理任何凸体，而无需为每种形状组合编写特定的代码。虽然它们的实现细节，特别是 <code>doSimplex</code> 和 <code>polytope.expand</code>，充满了复杂的几何逻辑和对数值稳定性的考量，但理解并掌握这对算法，是通往高级物理引擎开发和几何算法设计的必经之路。</p>
 
                     </main>
 
@@ -184,7 +292,7 @@
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../constraintSolver/IntroConstraintSolver.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../collision/CCD.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -198,7 +306,7 @@
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../constraintSolver/IntroConstraintSolver.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../collision/CCD.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
