@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>ImGui使用FAQ - Game Physics &amp; Development Notes</title>
+        <title>使用ImGui调试物理模拟 - Game Physics &amp; Development Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-a86b9dbc.js";
+            window.path_to_searchindex_js = "../searchindex-7ef0434a.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-b39f288b.js"></script>
+        <script src="../toc-efac3988.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -175,6 +175,48 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="使用imgui调试物理模拟"><a class="header" href="#使用imgui调试物理模拟">使用ImGui调试物理模拟</a></h1>
+<p>我们在写物理引擎和Demo时，或者研究Box2D和Bullet等物理引擎时，我们都会遇到一个问题：大量的参数调整，通过改参数来观察物理现象，来进行调试。这个过程，不断的改代码，编译，特别耗费时间。使用ImgGui可以很大程度解决这个问题。</p>
+<h2 id="imgui介绍"><a class="header" href="#imgui介绍">ImGui介绍</a></h2>
+<p>ImGui = Immediate Mode GUI（即时模式 GUI）,和传统 UI（按钮是一个对象、生命周期很长）不同，每一帧都会被“重新声明一遍”。UI 不保存状态，状态只存在于业务代码中。它是为调试、工具、实验而生的，不是为产品 UI 生的。ImGui的Git项目，在<a href="https://github.com/ocornut/imgui">这里</a>。</p>
+<h2 id="imgui工作原理"><a class="header" href="#imgui工作原理">ImGui工作原理</a></h2>
+<p>ImGui的核心工作原理,本质上是一个每帧循环，流程如下：</p>
+<ol>
+<li>平台层输入:操作系统或平台（SDL、GLFW、Win32 等）收集鼠标、键盘、滚轮、窗口尺寸等输入信息。</li>
+<li>ImGui IO 更新:平台层把这些输入写入 ImGuiIO，供 ImGui 内部使用。</li>
+<li>ImGui::NewFrame():开始新的一帧，清理上一帧临时数据，初始化布局、活跃控件状态和帧上下文。</li>
+<li>构建 UI（Immediate Mode）:通过函数调用声明界面元素（按钮、滑条等），每一帧重新生成 UI，而不是依赖长期对象。</li>
+<li>布局 + 交互 + ID 解析:计算控件位置和大小，判断输入是否命中控件，并根据 ID 系统处理交互状态（激活、拖拽等）。</li>
+<li>ImGui::Render():把当前帧的 UI 信息转换成纯渲染数据（Draw Data），不再包含 UI 逻辑。</li>
+<li>生成 Draw Data:整理顶点、索引和绘制命令，形成渲染用的数据列表。</li>
+<li>后端渲染执行:渲染后端（OpenGL、Vulkan、DirectX 等）读取 Draw Data，上传 GPU 并执行绘制，将 UI 显示在屏幕上。</li>
+</ol>
+<h2 id="物理模拟调试分类"><a class="header" href="#物理模拟调试分类">物理模拟调试分类</a></h2>
+<p>这是我会长期使用、也非常适合物理模拟研究的一种划分。</p>
+<ol>
+<li>物体系统控制（Simulation Control）</li>
+</ol>
+<p>物理系统基本控制：包括 Pause / Step / Fixed dt/ Sub step。</p>
+<ol start="2">
+<li>世界级参数（World / Environment）</li>
+</ol>
+<p>物理参数：重力 / 全局阻尼 / 全局速度和角速度控制 / Sleeping阈值</p>
+<ol start="3">
+<li>刚体与形状（Rigid Body &amp; Shape）</li>
+</ol>
+<p>刚体参数：Mass / Damping / Friction / Locked Freedom</p>
+<ol start="4">
+<li>约束与求解器（Constraint &amp; Solver）</li>
+</ol>
+<p>求解约束器相关参数：solver interation, Baumgarte, Warming start, 约束切换</p>
+<ol start="5">
+<li>可视化与诊断（Debug Visualization &amp; Diagnostics）</li>
+</ol>
+<p>显示开关：AABB， 接触点，法线，睡眠状态.</p>
+<ol start="6">
+<li>统计信息(Debug Info)</li>
+</ol>
+<p>刚体个数、接触点数、约束个数、FPS等。</p>
 
                     </main>
 
@@ -211,6 +253,22 @@
         <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
         <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
         <script>
