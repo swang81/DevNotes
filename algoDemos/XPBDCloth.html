@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>构建调试可视化平台 - Game Physics &amp; Development Notes</title>
+        <title>XPBD布料模拟 - Game Physics &amp; Development Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -175,78 +175,169 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-<h1 id="调试平台搭建"><a class="header" href="#调试平台搭建">调试平台搭建</a></h1>
-<p>做物理引擎开发，你可能很熟悉公式和算法，但如果只靠日志输出或打印数值，很多问题其实根本看不出来。比如：</p>
+<h1 id="xpbd布料模拟demo"><a class="header" href="#xpbd布料模拟demo">XPBD布料模拟Demo</a></h1>
+<p>这是一个扩展位置基动力学(XPBD)算法，基于CUDA加速的布料模拟的演示项目。支持拉伸、弯曲、固定与长距离约束，并提供粒子自碰撞与SDF碰撞处理。通过OpenGL实时渲染可视化调试。通过 GPU 并行友好的约束求解、稳定的时间步进策略、高效的空间哈希碰撞检测，以及针对原子操作和内存访问的多层优化，实现了高性能、稳定的实时布料模拟。</p>
+<h1 id="开发工具和库"><a class="header" href="#开发工具和库">开发工具和库</a></h1>
+<p>Visual Studio 2022 + C++(20) + CUDA 12.4。推荐库使用vcpkg进行管理。</p>
+<p>glfw3: 窗口管理库
+glad: OpenGL的资源加载
+fmt: 格式化输出
+glm: 3D数学库
+assimp: 模型加载
+ImGui: 图形界面</p>
+<h2 id="主循环"><a class="header" href="#主循环">主循环</a></h2>
+<p>采用常用的XPBD模拟的流程，先生成预测位置，处理碰撞，然后求解约束，最后更新位置。</p>
+<pre><code class="language-Cpp">CollideSDF(); // 与 SDF 碰撞（预稳定处理）
+for (int substep = 0; substep &lt; numSubsteps; substep++)
+{
+    PredictPositions();           // 预测粒子位置
+    FindNeighborsBySpatialHash(); // 空间哈希查找邻居
+    
+    // 处理碰撞
+    CollideParticles();           // 粒子间碰撞
+    CollideSDF();                 // 与 SDF 碰撞
+	
+    // 求解约束
+    for (int iteration = 0; iteration &lt; numIterations; iteration++)
+    {
+        SolveStretch();           // 拉伸约束
+        SolveAttachment();        // 固定约束
+        SolveBending();           // 弯曲约束
+        Integration();            // 应用累积位置偏移
+    }
+    
+    Finalize();                   // 更新速度与位置
+}
+ComputeNormals();                 // 计算法线用于渲染
+</code></pre>
+<h2 id="约束种类和求解"><a class="header" href="#约束种类和求解">约束种类和求解</a></h2>
 <ul>
-<li>约束在极端条件下会不会抖动？</li>
-<li>碰撞接触点是否正确？</li>
-<li>参数调节后行为是否符合直觉？</li>
+<li>拉伸约束（Stretch Constraint），约束相邻粒子之间的距离，用于模拟布料的经纬线结构。</li>
+<li>弯曲约束（Bending Constraint），约束相邻三角形之间的夹角，控制布料的柔软程度和抗折叠能力。</li>
+<li>固定约束（Attachment Constraint），将粒子绑定到世界空间中的点，用于悬挂、固定布料。</li>
+<li>长距离固定约束（Long Range Attachment, LRA），从全局尺度限制粒子到锚点的最大距离，用于抑制 GPU Jacobi 迭代下的整体拉伸问题。</li>
 </ul>
-<p>这些问题，可视化才是最直接、最有效的解法。所以，给物理引擎搭建一套“测试与展示工具链”几乎是必然的选择。这里，我来聊聊我自己常用的一套组合：<code>SDL2 + OpenGL + ImGui + Emscripten</code>，以及它们在物理引擎开发中的作用。</p>
-<h2 id="为什么需要工具链"><a class="header" href="#为什么需要工具链">为什么需要工具链？</a></h2>
-<p>物理引擎调试的核心目标只有三件事：</p>
+<h2 id="碰撞检测"><a class="header" href="#碰撞检测">碰撞检测</a></h2>
 <ul>
-<li>快速搭建实验场景</li>
-<li>实时观察物理状态</li>
-<li>方便调参与对比实验结果</li>
+<li>
+<p>布料自碰撞，把布料上的顶点当成球体。这些球体之间的碰撞，通过Space Hash方法进行检测，即对空间进行格子分类，仅对相邻格子内的球体进行碰撞检测。</p>
+</li>
+<li>
+<p>布料和物体碰撞，通过SDF(Signed Distance Field)方法进行碰撞检测。SDF函数是一个标量场，空间中每个点对应SDF值，通过正负号，区分在物体内外。布料的顶点，仍使用球来描述，碰撞的物体，使用SDF来进行描述。布料的顶点，去查询碰撞物体的SDF值，得到距离和法线方向，如果布料穿透物体表面，沿法线把粒子推回表面。</p>
+</li>
 </ul>
-<p>换句话说，你需要的不是完整的游戏框架，而是一个可视化实验台。这套工具链正好满足了这个需求。</p>
-<h2 id="sdl2解决平台差异专注物理"><a class="header" href="#sdl2解决平台差异专注物理">SDL2：解决平台差异，专注物理</a></h2>
-<p>https://www.libsdl.org/</p>
-<p>SDL2 的作用可能被低估了：它其实不是用来画图，而是帮你把平台差异的复杂性从脑子里移走。具体来说，SDL2 帮你搞定：</p>
+<h2 id="项目优化"><a class="header" href="#项目优化">项目优化</a></h2>
+<h3 id="1并行计算与-gpu-友好优化"><a class="header" href="#1并行计算与-gpu-友好优化">1.并行计算与 GPU 友好优化</a></h3>
+<p>核心目标： 让布料模拟适合 GPU 大规模并行执行。</p>
 <ul>
-<li>窗口创建</li>
-<li>OpenGL Context 管理</li>
-<li>键盘、鼠标甚至手柄输入</li>
-<li>跨平台主循环</li>
+<li>
+<p>Jacobi 迭代替代 Gauss-Seidel
+所有约束并行求解，避免线程间依赖，提升 GPU 利用率。</p>
+</li>
+<li>
+<p>位置增量累积（ApplyDeltas）
+将多个约束产生的位移先累积，再统一应用，减少并行更新导致的抖动。</p>
+</li>
+<li>
+<p>原子操作重排（Atomic Reorder）
+对向量分量的 atomicAdd 顺序进行打散，降低线程写冲突，提高吞吐率。</p>
+</li>
 </ul>
-<p>只要用 SDL2，你的物理实验环境就可以一次写，多端跑，而不用每个平台都写一堆底层代码。</p>
-<h2 id="opengl用最简洁的方式表达物理状态"><a class="header" href="#opengl用最简洁的方式表达物理状态">OpenGL：用最简洁的方式表达物理状态</a></h2>
-<p>在物理调试中，我们通常不追求花里胡哨的渲染，而是让物理数据可见。OpenGL 在这里的主要作用就是：</p>
+<h3 id="2时间步进与数值稳定性优化"><a class="header" href="#2时间步进与数值稳定性优化">2.时间步进与数值稳定性优化</a></h3>
+<p>核心目标： 在保持实时性能的同时避免数值爆炸和振动。</p>
 <ul>
-<li>画约束线段、法线、速度向量</li>
-<li>画基础几何体（Box、Sphere、Capsule）</li>
-<li>显示 Debug 信息（接触点、Jacobian 方向等）</li>
+<li>
+<p>子步（Substep）时间积分
+将一帧拆分为多个小步，提高高速运动下的稳定性。</p>
+</li>
+<li>
+<p>SDF 预稳定碰撞处理
+在约束迭代前先修正穿透，只改位置不改速度，抑制能量爆炸。</p>
+</li>
+<li>
+<p>长距离附着（Long Range Attachment, LRA）
+在 GPU 并行条件下减少布料整体拉伸，提高不可伸展性。</p>
+</li>
 </ul>
-<p>为了兼容网页，推荐使用 OpenGL ES 3 子集，这样后续迁移到 Web（WebGL）时，几乎不用改渲染代码。</p>
-<h2 id="imgui实时调参的利器"><a class="header" href="#imgui实时调参的利器">ImGui：实时调参的利器</a></h2>
-<p>https://github.com/ocornut/imgui</p>
-<p>物理引擎的参数往往非常多，而且非线性影响复杂。比如：</p>
+<h3 id="3碰撞检测与过滤优化"><a class="header" href="#3碰撞检测与过滤优化">3.碰撞检测与过滤优化</a></h3>
+<p>核心目标： 降低碰撞复杂度，避免无效或错误的碰撞响应。</p>
 <ul>
-<li>不同模拟测试场景</li>
-<li>迭代次数</li>
-<li>力学参数和力学模型</li>
-<li>时间步长</li>
+<li>
+<p>空间哈希（Spatial Hashing）
+将粒子分桶，只检测邻近网格内的粒子，避免 <span class="katex"><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.0641em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathnormal">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>碰撞。</p>
+</li>
+<li>
+<p>邻居缓存（Neighbor Caching）
+多个子步复用邻居结果，减少重复构建空间结构的开销。</p>
+</li>
+<li>
+<p>初始距离过滤（Collision Filtering）
+利用初始粒子距离忽略本来就相邻的粒子，防止自碰撞伪影。</p>
+</li>
 </ul>
-<p>如果每次修改都需要改代码、重编译，调试体验非常糟糕。ImGui 的价值就在于：参数就是界面，界面就是实验。
-你可以直接拖滑条、勾选开关，立即看到效果。</p>
-<h2 id="emscripten让实验跑进浏览器"><a class="header" href="#emscripten让实验跑进浏览器">Emscripten：让实验跑进浏览器</a></h2>
-<p>https://emscripten.org/</p>
-<p>当你想把实验环境分享给别人时，Emscripten 就派上用场了。它可以：</p>
+<h3 id="4-约束系统与物理模型优化"><a class="header" href="#4-约束系统与物理模型优化">4. 约束系统与物理模型优化</a></h3>
+<p>核心目标： 在有限迭代次数下保持物理合理性。</p>
 <ul>
-<li>把 C++ 编译成 WASM</li>
-<li>把 OpenGL ES 映射成 WebGL</li>
-<li>把 SDL2 的窗口和输入映射到 HTML Canvas</li>
+<li>
+<p>多类型约束并行求解
+拉伸、弯曲、附着约束统一在 GPU 上迭代处理。</p>
+</li>
+<li>
+<p>XPBD 形式的约束稳定性
+引入顺应性（Compliance），使约束在大时间步下仍然稳定。</p>
+</li>
+<li>
+<p>约束分层执行顺序
+合理安排约束顺序，减少误差累积。</p>
+</li>
 </ul>
-<p>核心优势是：几乎不改现有代码，就能在网页上跑你的物理演示，方便展示和教学。</p>
-<h2 id="总结为什么这条工具链值得推荐"><a class="header" href="#总结为什么这条工具链值得推荐">总结：为什么这条工具链值得推荐</a></h2>
-<p>组合起来，SDL2 + OpenGL + ImGui + Emscripten 构建的就是一个可视化物理实验台：</p>
+<h3 id="5数据结构与内存访问优化"><a class="header" href="#5数据结构与内存访问优化">5.数据结构与内存访问优化</a></h3>
+<p>核心目标： 提高显存访问效率，减少带宽浪费。</p>
 <ul>
-<li>可跨平台运行（桌面、网页）</li>
-<li>可快速调试参数</li>
-<li>可直接展示给同事、面试官或学生</li>
+<li>
+<p>结构化邻居数组布局
+使用利于合并访问（Coalesced Access）的邻居存储方式。</p>
+</li>
+<li>
+<p>减少随机内存访问
+尽量使用连续缓冲区和顺序访问模式。</p>
+</li>
+<li>
+<p>初始状态缓存（initialPositions）
+通过缓存初始几何关系，避免复杂拓扑查询。</p>
+</li>
 </ul>
-<p>换句话说，这条工具链不仅解决了调试问题，更解决了可信度问题——你的物理算法不是你说对，而是大家都能拖一拖、看一看、验证一遍。</p>
+<h3 id="6渲染与调试性能优化"><a class="header" href="#6渲染与调试性能优化">6.渲染与调试性能优化</a></h3>
+<p>核心目标： 在不影响模拟性能的情况下实现可视化。</p>
+<ul>
+<li>
+<p>屏幕空间粒子渲染
+用屏幕空间 billboard 代替真实几何，显著降低渲染开销。</p>
+</li>
+<li>
+<p>GPU Instancing（调试模式）
+在粒子数较少时方便调试结构和行为。</p>
+</li>
+<li>
+<p>延迟法线与深度计算
+以近似方式获得视觉效果，换取性能。</p>
+</li>
+</ul>
+<h2 id="参考文章"><a class="header" href="#参考文章">参考文章</a></h2>
+<p>[1] Müller et al., Position Based Dynamics, 2007</p>
+<p>[2] Macklin et al., Unified Particle Physics for Real-Time Applications, 2014</p>
+<p>[3] Macklin et al., XPBD: Position-Based Simulation of Compliant Constrained Dynamics, 2016</p>
+<p>[4] Müller et al., Long Range Attachments, 2012</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../integration/IntroIntergartion.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../algoDemos/Impuse2DReadMe.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../advancedTopic/IntroAdvancedTopic.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../tools/IntroTools.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -256,11 +347,11 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../integration/IntroIntergartion.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../algoDemos/Impuse2DReadMe.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../advancedTopic/IntroAdvancedTopic.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../tools/IntroTools.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

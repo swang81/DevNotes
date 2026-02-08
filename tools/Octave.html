@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>构建调试可视化平台 - Game Physics &amp; Development Notes</title>
+        <title>Octave使用FAQ - Game Physics &amp; Development Notes</title>
 
 
         <!-- Custom HTML head -->
@@ -175,80 +175,231 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-<h1 id="调试平台搭建"><a class="header" href="#调试平台搭建">调试平台搭建</a></h1>
-<p>做物理引擎开发，你可能很熟悉公式和算法，但如果只靠日志输出或打印数值，很多问题其实根本看不出来。比如：</p>
+<h1 id="octave使用faq"><a class="header" href="#octave使用faq">Octave使用FAQ</a></h1>
+<h2 id="octave简介"><a class="header" href="#octave简介">Octave简介</a></h2>
+<p>Octave 是一个以矩阵与数值计算为核心的科学计算工具，语法与 MATLAB 高度兼容，免费、开源、跨平台。在物理模拟开发中，可以先通过Octave进行物理公式的数值验证，然后在把算法写成C++。下面这个图描述了Octave在物理模拟开发中所处的位置：</p>
+<pre><code class="language-Cpp">物理公式 / 推导
+        ↓
+Octave：数值验证 / 行为观察
+        ↓
+C++ / UE / 引擎实现
+        ↓
+Demo 场景验证
+</code></pre>
+<h2 id="octave使用原则"><a class="header" href="#octave使用原则">Octave使用原则</a></h2>
 <ul>
-<li>约束在极端条件下会不会抖动？</li>
-<li>碰撞接触点是否正确？</li>
-<li>参数调节后行为是否符合直觉？</li>
+<li>一个脚本，只验证一个问题。</li>
+<li>变量名与C++一致。</li>
+<li>使用Octave验证引擎代码原理。</li>
 </ul>
-<p>这些问题，可视化才是最直接、最有效的解法。所以，给物理引擎搭建一套“测试与展示工具链”几乎是必然的选择。这里，我来聊聊我自己常用的一套组合：<code>SDL2 + OpenGL + ImGui + Emscripten</code>，以及它们在物理引擎开发中的作用。</p>
-<h2 id="为什么需要工具链"><a class="header" href="#为什么需要工具链">为什么需要工具链？</a></h2>
-<p>物理引擎调试的核心目标只有三件事：</p>
-<ul>
-<li>快速搭建实验场景</li>
-<li>实时观察物理状态</li>
-<li>方便调参与对比实验结果</li>
-</ul>
-<p>换句话说，你需要的不是完整的游戏框架，而是一个可视化实验台。这套工具链正好满足了这个需求。</p>
-<h2 id="sdl2解决平台差异专注物理"><a class="header" href="#sdl2解决平台差异专注物理">SDL2：解决平台差异，专注物理</a></h2>
-<p>https://www.libsdl.org/</p>
-<p>SDL2 的作用可能被低估了：它其实不是用来画图，而是帮你把平台差异的复杂性从脑子里移走。具体来说，SDL2 帮你搞定：</p>
-<ul>
-<li>窗口创建</li>
-<li>OpenGL Context 管理</li>
-<li>键盘、鼠标甚至手柄输入</li>
-<li>跨平台主循环</li>
-</ul>
-<p>只要用 SDL2，你的物理实验环境就可以一次写，多端跑，而不用每个平台都写一堆底层代码。</p>
-<h2 id="opengl用最简洁的方式表达物理状态"><a class="header" href="#opengl用最简洁的方式表达物理状态">OpenGL：用最简洁的方式表达物理状态</a></h2>
-<p>在物理调试中，我们通常不追求花里胡哨的渲染，而是让物理数据可见。OpenGL 在这里的主要作用就是：</p>
-<ul>
-<li>画约束线段、法线、速度向量</li>
-<li>画基础几何体（Box、Sphere、Capsule）</li>
-<li>显示 Debug 信息（接触点、Jacobian 方向等）</li>
-</ul>
-<p>为了兼容网页，推荐使用 OpenGL ES 3 子集，这样后续迁移到 Web（WebGL）时，几乎不用改渲染代码。</p>
-<h2 id="imgui实时调参的利器"><a class="header" href="#imgui实时调参的利器">ImGui：实时调参的利器</a></h2>
-<p>https://github.com/ocornut/imgui</p>
-<p>物理引擎的参数往往非常多，而且非线性影响复杂。比如：</p>
-<ul>
-<li>不同模拟测试场景</li>
-<li>迭代次数</li>
-<li>力学参数和力学模型</li>
-<li>时间步长</li>
-</ul>
-<p>如果每次修改都需要改代码、重编译，调试体验非常糟糕。ImGui 的价值就在于：参数就是界面，界面就是实验。
-你可以直接拖滑条、勾选开关，立即看到效果。</p>
-<h2 id="emscripten让实验跑进浏览器"><a class="header" href="#emscripten让实验跑进浏览器">Emscripten：让实验跑进浏览器</a></h2>
-<p>https://emscripten.org/</p>
-<p>当你想把实验环境分享给别人时，Emscripten 就派上用场了。它可以：</p>
-<ul>
-<li>把 C++ 编译成 WASM</li>
-<li>把 OpenGL ES 映射成 WebGL</li>
-<li>把 SDL2 的窗口和输入映射到 HTML Canvas</li>
-</ul>
-<p>核心优势是：几乎不改现有代码，就能在网页上跑你的物理演示，方便展示和教学。</p>
-<h2 id="总结为什么这条工具链值得推荐"><a class="header" href="#总结为什么这条工具链值得推荐">总结：为什么这条工具链值得推荐</a></h2>
-<p>组合起来，SDL2 + OpenGL + ImGui + Emscripten 构建的就是一个可视化物理实验台：</p>
-<ul>
-<li>可跨平台运行（桌面、网页）</li>
-<li>可快速调试参数</li>
-<li>可直接展示给同事、面试官或学生</li>
-</ul>
-<p>换句话说，这条工具链不仅解决了调试问题，更解决了可信度问题——你的物理算法不是你说对，而是大家都能拖一拖、看一看、验证一遍。</p>
+<h2 id="octave在vs-code中配置方法"><a class="header" href="#octave在vs-code中配置方法">Octave在VS Code中配置方法</a></h2>
+<ol>
+<li>
+<p>安装Octave，下载地址：https://www.gnu.org/software/octave/。</p>
+</li>
+<li>
+<p>确认命令可用。</p>
+</li>
+</ol>
+<pre><code class="language-Bash">octave --version
+</code></pre>
+<p>确保环境变量添加到PATH中</p>
+<pre><code class="language-Bash">C:\Program Files\GNU Octave\Octave-10.3.0\mingw64\bin
+</code></pre>
+<ol start="3">
+<li>
+<p>在Vscode商店中，添加插件Octave, Octave Language和Octave Debugger.</p>
+</li>
+<li>
+<p>新建测试项目test.m，绘制不同的加速度的自由落体运行曲线，并显示保存成svg格式图片。</p>
+</li>
+</ol>
+<pre><code class="language-cpp">%% test.m
+% 绘制不同重力加速度下的自由落体曲线，并保存为 SVG 文件
+
+clc; clear; close all;
+
+% -------------------------
+% 配置参数
+% -------------------------
+g_list = [9.81, 1.62, 3.71];   % 地球、月球、火星 (m/s^2)
+labels = {'Earth', 'Moon', 'Mars'};
+t_max = 5;                     % 模拟时间 (秒)
+dt = 0.01;                      % 时间步长
+
+% -------------------------
+% 生成时间序列
+% -------------------------
+t = 0:dt:t_max;
+
+% -------------------------
+% 绘制曲线
+% -------------------------
+figure;
+hold on;
+colors = ['r', 'b', 'g'];
+
+for i = 1:length(g_list)
+    g = g_list(i);
+    y = 0.5 * g * t.^2;       % 自由落体公式
+    plot(t, y, 'Color', colors(i), 'LineWidth', 2);
+end
+
+% -------------------------
+% 图形美化
+% -------------------------
+xlabel('Time (s)');
+ylabel('Height (m)');
+title('Free Fall under Different Gravity');
+legend(labels, 'Location', 'northwest');
+grid on;
+
+% -------------------------
+% 保存为 SVG 文件
+% -------------------------
+svg_filename = fullfile(pwd, 'free_fall.svg');  % 保存到当前目录
+print(svg_filename, '-dsvg');
+fprintf('SVG saved to %s\n', svg_filename);
+
+% -------------------------
+% 保持窗口
+% -------------------------
+pause;  % 阻塞，防止 CLI 下图像闪退
+
+</code></pre>
+<p><img src="./assets/free_fall.svg" alt=""></p>
+<h2 id="octave常见命令总结"><a class="header" href="#octave常见命令总结">Octave常见命令总结</a></h2>
+<p>整理一份实用清单，分为 矩阵操作 / 数值计算 / 绘图 / 辅助命令，并结合物理模拟场景说明。</p>
+<h3 id="矩阵和数组操作"><a class="header" href="#矩阵和数组操作">矩阵和数组操作</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>命令</th><th>说明</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td><code>zeros(n,m)</code></td><td>创建 n×m 的零矩阵</td><td><code>M = zeros(3,3);</code></td></tr>
+<tr><td><code>ones(n,m)</code></td><td>创建全 1 矩阵</td><td><code>v = ones(3,1);</code></td></tr>
+<tr><td><code>eye(n)</code></td><td>单位矩阵</td><td><code>I = eye(3);</code></td></tr>
+<tr><td><code>size(A)</code></td><td>返回矩阵尺寸</td><td><code>[r,c] = size(M);</code></td></tr>
+<tr><td><code>length(v)</code></td><td>向量长度</td><td><code>n = length(v);</code></td></tr>
+<tr><td><code>A'</code></td><td>转置矩阵</td><td><code>vT = v';</code></td></tr>
+<tr><td><code>inv(A)</code></td><td>矩阵求逆</td><td><code>M_inv = inv(M);</code></td></tr>
+<tr><td><code>det(A)</code></td><td>行列式</td><td><code>d = det(M);</code></td></tr>
+<tr><td><code>diag(v)</code></td><td>对角矩阵 / 提取对角</td><td><code>D = diag([1 2 3]);</code></td></tr>
+<tr><td><code>sum(A)</code></td><td>矩阵列求和</td><td><code>s = sum(F);</code></td></tr>
+<tr><td><code>prod(A)</code></td><td>矩阵列求积</td><td><code>p = prod(v);</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="数值计算和函数操作"><a class="header" href="#数值计算和函数操作">数值计算和函数操作</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>命令</th><th>说明</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td><code>linspace(a,b,n)</code></td><td>创建 n 个等间距点</td><td><code>t = linspace(0,5,100);</code></td></tr>
+<tr><td><code>: (冒号运算符)</code></td><td>等步长向量</td><td><code>t = 0:0.01:5;</code></td></tr>
+<tr><td><code>sqrt(x)</code></td><td>开平方</td><td><code>v = sqrt(2*g*h);</code></td></tr>
+<tr><td><code>abs(x)</code></td><td>绝对值</td><td><code>v = abs(v);</code></td></tr>
+<tr><td><code>sum</code>, <code>mean</code>, <code>max</code>, <code>min</code></td><td>常用统计</td><td><code>v_mean = mean(v);</code></td></tr>
+<tr><td><code>norm(v)</code></td><td>向量范数</td><td><code>v_len = norm(v);</code></td></tr>
+<tr><td><code>dot(a,b)</code></td><td>点积</td><td><code>d = dot(F,r);</code></td></tr>
+<tr><td><code>cross(a,b)</code></td><td>叉积</td><td><code>c = cross(r, F);</code></td></tr>
+<tr><td><code>eig(A)</code></td><td>特征值</td><td><code>[V,D] = eig(M);</code></td></tr>
+<tr><td><code>inv(A)</code>、<code>pinv(A)</code></td><td>矩阵逆 / 伪逆</td><td><code>J_pinv = pinv(J);</code></td></tr>
+<tr><td><code>rand</code>, <code>randn</code></td><td>随机数生成</td><td><code>noise = randn(3,1);</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="绘图和可视化"><a class="header" href="#绘图和可视化">绘图和可视化</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>命令</th><th>说明</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td><code>plot(x,y)</code></td><td>绘制二维曲线</td><td><code>plot(t,y);</code></td></tr>
+<tr><td><code>plot3(x,y,z)</code></td><td>三维曲线</td><td><code>plot3(X,Y,Z);</code></td></tr>
+<tr><td><code>figure</code></td><td>新建图形窗口</td><td><code>figure; plot(t,y);</code></td></tr>
+<tr><td><code>hold on/off</code></td><td>保持多条曲线</td><td><code>hold on; plot(t2,y2);</code></td></tr>
+<tr><td><code>xlabel('text')</code>、<code>ylabel('text')</code>、<code>zlabel('text')</code></td><td>坐标轴标签</td><td><code>xlabel('Time (s)');</code></td></tr>
+<tr><td><code>title('text')</code></td><td>图形标题</td><td><code>title('Free Fall');</code></td></tr>
+<tr><td><code>legend({'a','b'})</code></td><td>图例</td><td><code>legend({'Earth','Moon'});</code></td></tr>
+<tr><td><code>grid on/off</code></td><td>网格显示</td><td><code>grid on;</code></td></tr>
+<tr><td><code>axis([xmin xmax ymin ymax])</code></td><td>设置坐标轴</td><td><code>axis([0 5 0 50]);</code></td></tr>
+<tr><td><code>pause(t)</code></td><td>阻塞显示</td><td><code>pause;</code> 用于 CLI 绘图防止闪退</td></tr>
+<tr><td><code>saveas(gcf,'file.svg')</code></td><td>保存图像</td><td><code>saveas(gcf,'freefall.svg');</code></td></tr>
+<tr><td><code>print('file.svg','-dsvg')</code></td><td>推荐保存 SVG</td><td><code>print('freefall.svg','-dsvg');</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="文本和脚本操作"><a class="header" href="#文本和脚本操作">文本和脚本操作</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>命令</th><th>说明</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td><code>load('file.mat')</code></td><td>加载数据</td><td><code>load('simulation.mat');</code></td></tr>
+<tr><td><code>save('file.mat','var1','var2')</code></td><td>保存数据</td><td><code>save('results.mat','t','y');</code></td></tr>
+<tr><td><code>run('script.m')</code></td><td>执行脚本</td><td><code>run('Box.m');</code></td></tr>
+<tr><td><code>edit script.m</code></td><td>打开编辑器</td><td><code>edit test.m;</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="控制流程"><a class="header" href="#控制流程">控制流程</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>命令</th><th>说明</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td><code>for i = 1:N ... end</code></td><td>循环</td><td><code>for i=1:100; y(i)=0.5*g*t(i)^2; end</code></td></tr>
+<tr><td><code>while condition ... end</code></td><td>循环</td><td><code>while norm(F)&gt;1e-5; ... end</code></td></tr>
+<tr><td><code>if ... elseif ... else ... end</code></td><td>条件</td><td><code>if x&gt;0 ... else ... end</code></td></tr>
+<tr><td><code>break</code></td><td>退出循环</td><td><code>if t&gt;5, break; end</code></td></tr>
+<tr><td><code>continue</code></td><td>跳过本次循环</td><td><code>if y&lt;0, continue; end</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="线性代数求解"><a class="header" href="#线性代数求解">线性代数求解</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>命令</th><th>说明</th><th>示例</th></tr>
+</thead>
+<tbody>
+<tr><td><code>A\b</code></td><td>解线性方程组</td><td><code>v = M\F;</code></td></tr>
+<tr><td><code>pinv(A)*b</code></td><td>伪逆求解</td><td><code>v = pinv(J)*C;</code></td></tr>
+<tr><td><code>eig(A)</code></td><td>特征值分析</td><td><code>[V,D] = eig(M);</code></td></tr>
+<tr><td><code>svd(A)</code></td><td>奇异值分解</td><td><code>[U,S,V] = svd(J);</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="调整辅助命令"><a class="header" href="#调整辅助命令">调整辅助命令</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>命令</th><th>说明</th></tr>
+</thead>
+<tbody>
+<tr><td><code>disp(var)</code></td><td>打印变量</td></tr>
+<tr><td><code>fprintf(...)</code></td><td>格式化输出</td></tr>
+<tr><td><code>keyboard</code></td><td>暂停执行进入命令行（类似断点）</td></tr>
+<tr><td><code>who</code> / <code>whos</code></td><td>查看当前变量</td></tr>
+</tbody>
+</table>
+</div>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../integration/IntroIntergartion.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../tools/SDL.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../advancedTopic/IntroAdvancedTopic.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -256,13 +407,10 @@
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../integration/IntroIntergartion.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../tools/SDL.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../advancedTopic/IntroAdvancedTopic.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
-                    </a>
             </nav>
 
         </div>
