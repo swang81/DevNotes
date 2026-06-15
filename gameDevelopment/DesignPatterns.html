@@ -1,0 +1,1202 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>游戏设计模式 - Game Physics &amp; Development Notes</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-af99728e.css">
+        <link rel="stylesheet" href="../css/general-4abed72c.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-dd8e6b8c.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-8745a6bd.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-cf43bcc4.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Game Physics &amp; Development Notes</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+<h1 id="游戏设计模式gof-23种"><a class="header" href="#游戏设计模式gof-23种">游戏设计模式（GoF 23种）</a></h1>
+<p>GoF（Gang of Four）23种经典设计模式，结合 UE5/C++ 讲解。</p>
+<p>每种模式包含：<strong>原理与用途</strong> → <strong>最简C++示例</strong> → <strong>UE中的应用</strong></p>
+<hr>
+<h2 id="一创建型模式creational"><a class="header" href="#一创建型模式creational">一、创建型模式（Creational）</a></h2>
+<blockquote>
+<p>关注<strong>对象的创建方式</strong>，解耦创建逻辑与使用逻辑。</p>
+</blockquote>
+<hr>
+<h3 id="1-单例-singleton"><a class="header" href="#1-单例-singleton">1. 单例 Singleton</a></h3>
+<p><strong>原理与用途</strong><br>保证一个类全局只有一个实例，并提供统一访问点。用于管理全局状态，如游戏配置、音频管理器。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class AudioManager
+{
+public:
+    static AudioManager&amp; Get()
+    {
+        static AudioManager Instance;
+        return Instance;
+    }
+    void PlaySound(const std::string&amp; Name) {}
+
+private:
+    AudioManager() = default;
+    AudioManager(const AudioManager&amp;) = delete;
+};
+
+// 使用
+AudioManager::Get().PlaySound("Explosion");
+</code></pre>
+<p><strong>UE中的应用</strong><br>UE 不推荐裸单例，而是用 <strong>Subsystem</strong> 替代：</p>
+<ul>
+<li><code>UGameInstanceSubsystem</code>：生命周期与 GameInstance 绑定，整局游戏唯一</li>
+<li><code>UWorldSubsystem</code>：生命周期与 World 绑定</li>
+<li><code>UEngineSubsystem</code>：编辑器/引擎级别唯一</li>
+</ul>
+<pre><code class="language-cpp">// 获取
+UMySubsystem* Sub = GetGameInstance()-&gt;GetSubsystem&lt;UMySubsystem&gt;();
+</code></pre>
+<hr>
+<h3 id="2-工厂方法-factory-method"><a class="header" href="#2-工厂方法-factory-method">2. 工厂方法 Factory Method</a></h3>
+<p><strong>原理与用途</strong><br>定义创建对象的接口，让<strong>子类决定实例化哪个类</strong>。用于框架不知道需要创建哪种具体产品时。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class Weapon { public: virtual void Fire() = 0; };
+class Rifle  : public Weapon { public: void Fire() override {} };
+class Pistol : public Weapon { public: void Fire() override {} };
+
+class WeaponFactory
+{
+public:
+    virtual Weapon* Create() = 0; // 工厂方法
+};
+
+class RifleFactory : public WeaponFactory
+{
+public:
+    Weapon* Create() override { return new Rifle(); }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><code>SpawnActor&lt;T&gt;()</code> 是最常用的工厂方法，通过 <code>TSubclassOf&lt;T&gt;</code> 在运行时决定生成哪个子类</li>
+<li>蓝图子类配合 <code>TSubclassOf</code> 属性，让设计师指定具体类型</li>
+</ul>
+<pre><code class="language-cpp">UPROPERTY(EditAnywhere)
+TSubclassOf&lt;AWeapon&gt; WeaponClass;
+
+AWeapon* Weapon = World-&gt;SpawnActor&lt;AWeapon&gt;(WeaponClass, SpawnTransform);
+</code></pre>
+<hr>
+<h3 id="3-抽象工厂-abstract-factory"><a class="header" href="#3-抽象工厂-abstract-factory">3. 抽象工厂 Abstract Factory</a></h3>
+<p><strong>原理与用途</strong><br>创建<strong>一系列相关对象</strong>的接口，不指定具体类。用于需要保证一组对象相互兼容时（如不同风格的UI套件）。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">// 抽象产品
+class Button { public: virtual void Click() = 0; };
+class Icon   { public: virtual void Draw()  = 0; };
+
+// 抽象工厂
+class UIFactory
+{
+public:
+    virtual Button* CreateButton() = 0;
+    virtual Icon*   CreateIcon()   = 0;
+};
+
+// 具体工厂（科幻风格）
+class ScifiUIFactory : public UIFactory
+{
+public:
+    Button* CreateButton() override { return new ScifiButton(); }
+    Icon*   CreateIcon()   override { return new ScifiIcon(); }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li>用 <code>UDataAsset</code> 定义一套主题配置，工厂读取 DataAsset 生成对应对象</li>
+<li>不同平台（PC/Mobile）生成不同 UI 控件集合</li>
+<li><code>UUserWidget</code> 的工厂创建：<code>CreateWidget&lt;UMyWidget&gt;()</code></li>
+</ul>
+<hr>
+<h3 id="4-建造者-builder"><a class="header" href="#4-建造者-builder">4. 建造者 Builder</a></h3>
+<p><strong>原理与用途</strong><br>将复杂对象的<strong>构建过程分步进行</strong>，同样的构建过程可以产生不同结果。用于构建参数很多、步骤复杂的对象。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">struct CharacterConfig { std::string Name; int HP; int ATK; };
+
+class CharacterBuilder
+{
+    CharacterConfig Config;
+public:
+    CharacterBuilder&amp; SetName(const std::string&amp; Name) { Config.Name = Name; return *this; }
+    CharacterBuilder&amp; SetHP(int HP)   { Config.HP = HP;   return *this; }
+    CharacterBuilder&amp; SetATK(int ATK) { Config.ATK = ATK; return *this; }
+    CharacterConfig   Build()         { return Config; }
+};
+
+// 使用（链式调用）
+auto Config = CharacterBuilder().SetName("Hero").SetHP(100).SetATK(50).Build();
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><code>FActorSpawnParameters</code> 就是建造者思想：先配置各种参数，再传给 <code>SpawnActor</code></li>
+<li>编辑器中的 <code>FPropertyChangedEvent</code> 构建流程</li>
+<li>程序化生成关卡时，分步设置房间参数再生成</li>
+</ul>
+<pre><code class="language-cpp">FActorSpawnParameters Params;
+Params.Owner   = this;
+Params.Instigator = GetInstigator();
+Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+World-&gt;SpawnActor&lt;AEnemy&gt;(EnemyClass, Transform, Params);
+</code></pre>
+<hr>
+<h3 id="5-原型-prototype"><a class="header" href="#5-原型-prototype">5. 原型 Prototype</a></h3>
+<p><strong>原理与用途</strong><br>通过<strong>克隆现有对象</strong>来创建新对象，避免重复初始化开销。用于创建与已有对象类似的对象时。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class Monster
+{
+public:
+    int HP; std::string Name;
+    virtual Monster* Clone() { return new Monster(*this); } // 克隆自身
+};
+
+class BossMonster : public Monster
+{
+public:
+    Monster* Clone() override { return new BossMonster(*this); }
+};
+
+// 使用：从原型克隆
+Monster* Prototype = new BossMonster();
+Monster* Clone1 = Prototype-&gt;Clone();
+Monster* Clone2 = Prototype-&gt;Clone();
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><code>StaticDuplicateObject()</code> / 编辑器中的 Duplicate Actor（Ctrl+W）</li>
+<li><code>UObject::StaticDuplicateObject(Source, Outer)</code> 深拷贝 UObject</li>
+<li>关卡中批量放置同类 Actor 的基础机制</li>
+</ul>
+<pre><code class="language-cpp">UObject* NewObj = StaticDuplicateObject(SourceObject, Outer, NAME_None);
+</code></pre>
+<hr>
+<h2 id="二结构型模式structural"><a class="header" href="#二结构型模式structural">二、结构型模式（Structural）</a></h2>
+<blockquote>
+<p>关注<strong>类和对象的组合方式</strong>，构建更大的结构。</p>
+</blockquote>
+<hr>
+<h3 id="6-适配器-adapter"><a class="header" href="#6-适配器-adapter">6. 适配器 Adapter</a></h3>
+<p><strong>原理与用途</strong><br>将一个类的接口<strong>转换成客户期望的另一个接口</strong>，使原本不兼容的类可以合作。用于集成第三方库或遗留代码。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">// 旧接口
+class OldLogger { public: void WriteLog(std::string Msg) {} };
+
+// 目标接口
+class ILogger { public: virtual void Log(std::string Msg) = 0; };
+
+// 适配器
+class LoggerAdapter : public ILogger
+{
+    OldLogger Old;
+public:
+    void Log(std::string Msg) override { Old.WriteLog(Msg); } // 转换调用
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><code>UInterface</code> 是UE中适配器模式的核心工具：让不同类型的 Actor 暴露统一接口</li>
+<li><code>IAbilitySystemInterface</code> 让任意 Actor 提供 ASC，无需关心具体类型</li>
+<li>集成第三方物理/音频 SDK 时，用 Wrapper 类适配 UE 的调用约定</li>
+</ul>
+<pre><code class="language-cpp">// 任何实现了接口的Actor都可以统一处理
+if (IInteractable* Interactable = Cast&lt;IInteractable&gt;(HitActor))
+{
+    Interactable-&gt;Interact(this);
+}
+</code></pre>
+<hr>
+<h3 id="7-桥接-bridge"><a class="header" href="#7-桥接-bridge">7. 桥接 Bridge</a></h3>
+<p><strong>原理与用途</strong><br>将<strong>抽象与实现分离</strong>，使二者可以独立变化。用于避免“类爆炸“——当有多个维度的变化时。</p>
+<pre class="mermaid">classDiagram
+    class Shape {
+        -Renderer: IRenderer
+        +Render()*
+    }
+    class Circle {
+        +Render()
+    }
+    class IRenderer {
+        +Draw(string)*
+    }
+    class DX12Renderer {
+        +Draw(string)
+    }
+    class VulkanRenderer {
+        +Draw(string)
+    }
+    Shape &lt;|-- Circle
+    Shape o-- IRenderer : bridge
+    IRenderer &lt;|-- DX12Renderer
+    IRenderer &lt;|-- VulkanRenderer
+</pre>
+
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">// 实现层
+class IRenderer { public: virtual void Draw(std::string Shape) = 0; };
+class DX12Renderer : public IRenderer { public: void Draw(std::string Shape) override {} };
+class VulkanRenderer : public IRenderer { public: void Draw(std::string Shape) override {} };
+
+// 抽象层（持有实现的引用）
+class Shape
+{
+protected:
+    IRenderer* Renderer;
+public:
+    Shape(IRenderer* R) : Renderer(R) {}
+    virtual void Render() = 0;
+};
+
+class Circle : public Shape
+{
+public:
+    void Render() override { Renderer-&gt;Draw("Circle"); }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li>**RHI（Rendering Hardware Interface）**是桥接模式的典型：上层渲染逻辑不关心底层是 DX12 还是 Vulkan</li>
+<li><code>FRHICommandList</code> 作为抽象层，后端实现可以是不同图形API</li>
+<li>音频系统：<code>UAudioComponent</code>（抽象）与底层 <code>FAudioDevice</code>（实现）分离</li>
+</ul>
+<hr>
+<h3 id="8-组合-composite"><a class="header" href="#8-组合-composite">8. 组合 Composite</a></h3>
+<p><strong>原理与用途</strong><br>将对象组织成<strong>树形结构</strong>，使客户对单个对象和组合对象的使用方式一致。用于表示“部分-整体“层次结构。</p>
+<pre class="mermaid">classDiagram
+    class UIElement {
+        +Render()*
+        +Add(UIElement)
+    }
+    class Button {
+        +Render()
+    }
+    class Panel {
+        +Render()
+        +Add(UIElement)
+    }
+    UIElement &lt;|-- Button
+    UIElement &lt;|-- Panel
+    Panel o-- UIElement : children
+</pre>
+
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class UIElement
+{
+public:
+    virtual void Render() = 0;
+    virtual void Add(UIElement* E) {}
+};
+
+class Button : public UIElement  // 叶节点
+{
+public:
+    void Render() override { /* 画按钮 */ }
+};
+
+class Panel : public UIElement   // 容器节点
+{
+    std::vector&lt;UIElement*&gt; Children;
+public:
+    void Add(UIElement* E) override { Children.push_back(E); }
+    void Render() override { for (auto* C : Children) C-&gt;Render(); }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>USceneComponent</code> 树形层级</strong>：父子组件形成树，变换自动传递</li>
+<li><strong>UMG Widget 树</strong>：<code>UPanelWidget</code> 可以包含任意子 Widget，统一调用 <code>AddToViewport</code></li>
+<li><strong><code>AActor</code> 的组件系统</strong>本身就是组合模式的体现</li>
+</ul>
+<pre><code class="language-cpp">// SceneComponent 树
+RootComponent → MeshComponent
+             → WeaponComponent → MuzzleComponent
+</code></pre>
+<hr>
+<h3 id="9-装饰器-decorator"><a class="header" href="#9-装饰器-decorator">9. 装饰器 Decorator</a></h3>
+<p><strong>原理与用途</strong><br>动态地给对象<strong>添加职责</strong>，比继承更灵活。用于需要在运行时给对象增删功能时。</p>
+<pre class="mermaid">classDiagram
+    class IWeapon {
+        +GetDamage()*
+    }
+    class BaseGun {
+        +GetDamage()
+    }
+    class SilencerDecorator {
+        -Wrapped: IWeapon
+        +GetDamage()
+    }
+    IWeapon &lt;|-- BaseGun
+    IWeapon &lt;|-- SilencerDecorator
+    SilencerDecorator o-- IWeapon : wraps
+</pre>
+
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class IWeapon { public: virtual int GetDamage() = 0; };
+class BaseGun : public IWeapon { public: int GetDamage() override { return 10; } };
+
+// 装饰器：包装原对象，增加功能
+class SilencerDecorator : public IWeapon
+{
+    IWeapon* Wrapped;
+public:
+    SilencerDecorator(IWeapon* W) : Wrapped(W) {}
+    int GetDamage() override { return Wrapped-&gt;GetDamage() - 2; } // 修改行为
+};
+
+// 使用
+IWeapon* Gun = new SilencerDecorator(new BaseGun()); // 伤害 = 8
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong>动态挂载 <code>UActorComponent</code></strong> 是UE最自然的装饰器：运行时 <code>AddComponentByClass()</code> 给Actor追加能力</li>
+<li><strong><code>GameplayEffect</code> 叠层</strong>：对角色属性动态叠加/移除效果</li>
+<li><strong><code>UActorComponent</code> 的 <code>bAutoActivate</code></strong> 控制装饰是否生效</li>
+</ul>
+<pre><code class="language-cpp">// 运行时给Actor动态添加功能组件
+UMyBurningComponent* Comp = Cast&lt;UMyBurningComponent&gt;(
+    Actor-&gt;AddComponentByClass(UMyBurningComponent::StaticClass(), true, FTransform(), false)
+);
+</code></pre>
+<hr>
+<h3 id="10-外观-facade"><a class="header" href="#10-外观-facade">10. 外观 Facade</a></h3>
+<p><strong>原理与用途</strong><br>为复杂子系统提供<strong>统一的简化接口</strong>。用于降低客户与子系统的耦合，提供易用的API层。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">// 复杂子系统
+class PhysicsEngine  { public: void Init() {} void Step(float Dt) {} };
+class AudioEngine    { public: void Init() {} void Play(std::string S) {} };
+class NetworkManager { public: void Connect(std::string IP) {} };
+
+// 外观：一个简单入口
+class GameFacade
+{
+    PhysicsEngine  Physics;
+    AudioEngine    Audio;
+    NetworkManager Network;
+public:
+    void StartGame(std::string ServerIP)
+    {
+        Physics.Init();
+        Audio.Init();
+        Network.Connect(ServerIP);
+    }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>UGameplayStatics</code></strong> 是最典型的外观：<code>PlaySound2D</code>、<code>SpawnEmitterAtLocation</code> 等封装了复杂的子系统调用</li>
+<li><strong><code>UKismetMathLibrary</code></strong>、<strong><code>UKismetSystemLibrary</code></strong> 同理</li>
+<li><code>GetGameMode()</code>、<code>GetPlayerController()</code> 等全局访问函数也是外观思想</li>
+</ul>
+<pre><code class="language-cpp">// 一行调用，隐藏内部复杂性
+UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
+UGameplayStatics::SpawnEmitterAtLocation(World, FireFX, Transform);
+</code></pre>
+<hr>
+<h3 id="11-享元-flyweight"><a class="header" href="#11-享元-flyweight">11. 享元 Flyweight</a></h3>
+<p><strong>原理与用途</strong><br>通过<strong>共享</strong>来支持大量细粒度对象，将对象状态分为内部状态（共享）和外部状态（独有）。用于大量相似对象造成内存压力时。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">// 内部状态（共享）
+class BulletData { public: std::string MeshPath; float Speed; };
+
+// 享元工厂：相同类型只创建一次
+class BulletFactory
+{
+    std::unordered_map&lt;std::string, BulletData*&gt; Cache;
+public:
+    BulletData* Get(const std::string&amp; Type)
+    {
+        if (!Cache.count(Type)) Cache[Type] = new BulletData();
+        return Cache[Type];
+    }
+};
+
+// 外部状态（每颗子弹独有）
+struct Bullet { BulletData* Data; FVector Position; FVector Velocity; };
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>UStaticMesh</code> 共享</strong>：场景中1000棵树共享同一个 <code>UStaticMesh</code> 资源，只有 Transform 不同</li>
+<li><strong><code>FName</code></strong>：UE内部对字符串做了享元处理，相同字符串只存一份</li>
+<li><strong><code>UMaterialInstanceDynamic</code></strong> 共享基础材质，只改动各自的参数</li>
+<li><strong><code>HISM (Hierarchical Instanced Static Mesh)</code></strong> 是享元+GPU实例化的结合</li>
+</ul>
+<hr>
+<h3 id="12-代理-proxy"><a class="header" href="#12-代理-proxy">12. 代理 Proxy</a></h3>
+<p><strong>原理与用途</strong><br>为对象提供<strong>代理</strong>以控制对它的访问，可以延迟加载、访问控制、远程访问等。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class ITexture { public: virtual void Render() = 0; };
+
+class RealTexture : public ITexture
+{
+public:
+    RealTexture() { /* 加载耗时操作 */ }
+    void Render() override {}
+};
+
+// 代理：延迟到真正需要时才加载
+class TextureProxy : public ITexture
+{
+    RealTexture* Real = nullptr;
+public:
+    void Render() override
+    {
+        if (!Real) Real = new RealTexture(); // 懒加载
+        Real-&gt;Render();
+    }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>TSoftObjectPtr&lt;T&gt;</code> / <code>TSoftClassPtr&lt;T&gt;</code></strong>：资源代理，不立即加载，需要时才 <code>LoadSynchronous()</code> 或异步加载</li>
+<li><strong>网络 RPC</strong>：客户端调用看似本地函数，实际由代理发送到服务器执行</li>
+<li><strong><code>UChildActorComponent</code></strong>：代理管理子 Actor 的生命周期</li>
+</ul>
+<pre><code class="language-cpp">// 软引用：代理模式
+UPROPERTY(EditAnywhere)
+TSoftObjectPtr&lt;UTexture2D&gt; LazyTexture;
+
+// 需要时才真正加载
+UTexture2D* Tex = LazyTexture.LoadSynchronous();
+</code></pre>
+<hr>
+<h2 id="三行为型模式behavioral"><a class="header" href="#三行为型模式behavioral">三、行为型模式（Behavioral）</a></h2>
+<blockquote>
+<p>关注<strong>对象之间的通信与职责分配</strong>。</p>
+</blockquote>
+<hr>
+<h3 id="13-责任链-chain-of-responsibility"><a class="header" href="#13-责任链-chain-of-responsibility">13. 责任链 Chain of Responsibility</a></h3>
+<p><strong>原理与用途</strong><br>将请求<strong>沿链传递</strong>，直到有对象处理它。用于解耦请求发送者和接收者，支持多级处理。</p>
+<pre class="mermaid">classDiagram
+    class Handler {
+        -Next: Handler
+        +SetNext(Handler)
+        +Handle(int)
+    }
+    class LowHandler {
+        +Handle(int)
+    }
+    class HighHandler {
+        +Handle(int)
+    }
+    Handler &lt;|-- LowHandler
+    Handler &lt;|-- HighHandler
+    Handler o-- Handler : next
+</pre>
+
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class Handler
+{
+protected:
+    Handler* Next = nullptr;
+public:
+    void SetNext(Handler* H) { Next = H; }
+    virtual void Handle(int Request)
+    {
+        if (Next) Next-&gt;Handle(Request); // 传递给下一个
+    }
+};
+
+class LowHandler : public Handler
+{
+public:
+    void Handle(int Request) override
+    {
+        if (Request &lt; 10) { /* 处理 */ }
+        else Handler::Handle(Request); // 传递
+    }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>Enhanced Input</code> 的优先级映射</strong>：<code>IMC</code> 按优先级叠加，高优先级先处理输入</li>
+<li><strong>UMG 的事件冒泡</strong>：子 Widget 未处理的输入事件向父级传递</li>
+<li><strong><code>APlayerController</code> → <code>APawn</code> → <code>ACharacter</code></strong> 的输入处理链</li>
+</ul>
+<hr>
+<h3 id="14-命令-command"><a class="header" href="#14-命令-command">14. 命令 Command</a></h3>
+<p><strong>原理与用途</strong><br>将操作<strong>封装为对象</strong>，支持撤销/重做、队列、日志记录。用于输入系统、操作历史、网络指令。</p>
+<pre class="mermaid">classDiagram
+    class ICommand {
+        +Execute()*
+        +Undo()*
+    }
+    class MoveCommand {
+        -Actor
+        -Delta: FVector
+        +Execute()
+        +Undo()
+    }
+    class Invoker {
+        -History: stack
+        +Do(ICommand)
+        +Undo()
+    }
+    ICommand &lt;|-- MoveCommand
+    Invoker o-- ICommand : history
+</pre>
+
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class ICommand
+{
+public:
+    virtual void Execute() = 0;
+    virtual void Undo()    = 0;
+};
+
+class MoveCommand : public ICommand
+{
+    AActor* Actor; FVector Delta;
+public:
+    MoveCommand(AActor* A, FVector D) : Actor(A), Delta(D) {}
+    void Execute() override { Actor-&gt;AddActorWorldOffset(Delta); }
+    void Undo()    override { Actor-&gt;AddActorWorldOffset(-Delta); }
+};
+
+// 撤销栈
+std::stack&lt;ICommand*&gt; History;
+void Do(ICommand* Cmd)   { Cmd-&gt;Execute(); History.push(Cmd); }
+void Undo()              { History.top()-&gt;Undo(); History.pop(); }
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>UGameplayAbility</code></strong>：每个技能是一个命令对象，有 <code>ActivateAbility</code> / <code>EndAbility</code></li>
+<li><strong><code>UInputAction</code> 绑定</strong>：将输入事件映射为命令</li>
+<li><strong>编辑器的 Undo/Redo 系统</strong>（<code>GEditor-&gt;UndoTransaction()</code>）就是命令模式</li>
+</ul>
+<hr>
+<h3 id="15-迭代器-iterator"><a class="header" href="#15-迭代器-iterator">15. 迭代器 Iterator</a></h3>
+<p><strong>原理与用途</strong><br>提供<strong>顺序访问集合</strong>的方式，不暴露集合的内部结构。用于统一遍历不同类型的容器。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class NumberList
+{
+    std::vector&lt;int&gt; Data = {1, 2, 3, 4, 5};
+public:
+    // 提供标准迭代器接口
+    auto begin() { return Data.begin(); }
+    auto end()   { return Data.end(); }
+};
+
+// 使用：不关心内部是 vector 还是其他
+NumberList List;
+for (int Num : List) { /* 处理 */ }
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>TArray</code> / <code>TMap</code> 的 range-for</strong>：<code>for (AActor* Actor : Actors)</code></li>
+<li><strong><code>TActorIterator&lt;T&gt;</code></strong>：遍历世界中所有某类型的 Actor</li>
+</ul>
+<pre><code class="language-cpp">// 遍历世界中所有Enemy
+for (TActorIterator&lt;AEnemy&gt; It(GetWorld()); It; ++It)
+{
+    It-&gt;TakeDamage(10.f);
+}
+</code></pre>
+<hr>
+<h3 id="16-中介者-mediator"><a class="header" href="#16-中介者-mediator">16. 中介者 Mediator</a></h3>
+<p><strong>原理与用途</strong><br>用<strong>中介对象</strong>封装一系列对象的交互，对象之间不直接引用彼此。用于减少多个对象之间的耦合。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class Mediator; // 前向声明
+
+class Player
+{
+    Mediator* Med;
+public:
+    Player(Mediator* M) : Med(M) {}
+    void SendMessage(std::string Msg);
+    void ReceiveMessage(std::string Msg) {}
+};
+
+class Mediator
+{
+    std::vector&lt;Player*&gt; Players;
+public:
+    void AddPlayer(Player* P) { Players.push_back(P); }
+    void Broadcast(std::string Msg, Player* Sender)
+    {
+        for (auto* P : Players)
+            if (P != Sender) P-&gt;ReceiveMessage(Msg);
+    }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>AGameMode</code></strong>：协调玩家、规则、生成等，各系统不直接通信</li>
+<li><strong><code>AGameState</code></strong>：广播同步状态给所有客户端</li>
+<li><strong><code>UEventSubsystem</code>（自定义事件总线）</strong>：解耦模块间通信</li>
+</ul>
+<hr>
+<h3 id="17-备忘录-memento"><a class="header" href="#17-备忘录-memento">17. 备忘录 Memento</a></h3>
+<p><strong>原理与用途</strong><br>在不破坏封装的前提下，<strong>捕获并恢复</strong>对象的内部状态。用于存档、撤销、快照功能。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">// 备忘录：保存状态
+struct Memento { int HP; FVector Position; };
+
+class Character
+{
+    int HP = 100; FVector Position;
+public:
+    Memento Save()               { return {HP, Position}; }    // 存档
+    void    Restore(Memento M)   { HP = M.HP; Position = M.Position; } // 读档
+};
+
+// 存档管理器
+std::stack&lt;Memento&gt; SaveSlots;
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>USaveGame</code></strong>：UE 的存档系统，<code>UGameplayStatics::SaveGameToSlot</code> / <code>LoadGameFromSlot</code></li>
+<li>编辑器中 Actor 属性的 Undo 记录（<code>FTransaction</code>）</li>
+</ul>
+<pre><code class="language-cpp">UCLASS()
+class UMySaveGame : public USaveGame
+{
+    GENERATED_BODY()
+public:
+    UPROPERTY() int32 PlayerHP;
+    UPROPERTY() FVector PlayerPosition;
+};
+
+// 保存
+UGameplayStatics::SaveGameToSlot(SaveGameObject, "Slot1", 0);
+// 读取
+USaveGame* Loaded = UGameplayStatics::LoadGameFromSlot("Slot1", 0);
+</code></pre>
+<hr>
+<h3 id="18-观察者-observer"><a class="header" href="#18-观察者-observer">18. 观察者 Observer</a></h3>
+<p><strong>原理与用途</strong><br>定义<strong>一对多依赖</strong>，当对象状态变化时自动通知所有依赖者。用于事件系统、UI数据绑定、解耦通知逻辑。</p>
+<pre class="mermaid">classDiagram
+    class Subject {
+        -Observers: list
+        +Subscribe(IObserver)
+        +SetValue(int)
+    }
+    class IObserver {
+        +OnNotify(int)*
+    }
+    class HUDWidget {
+        +OnNotify(int)
+    }
+    class SoundPlayer {
+        +OnNotify(int)
+    }
+    Subject o-- IObserver : 1..n
+    IObserver &lt;|-- HUDWidget
+    IObserver &lt;|-- SoundPlayer
+</pre>
+
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class IObserver { public: virtual void OnNotify(int Value) = 0; };
+
+class Subject
+{
+    std::vector&lt;IObserver*&gt; Observers;
+    int Value = 0;
+public:
+    void Subscribe(IObserver* O) { Observers.push_back(O); }
+    void SetValue(int V)
+    {
+        Value = V;
+        for (auto* O : Observers) O-&gt;OnNotify(V); // 通知所有观察者
+    }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>DECLARE_MULTICAST_DELEGATE</code></strong>：UE 观察者的标准实现，类型安全，自动管理绑定</li>
+</ul>
+<pre><code class="language-cpp">DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float);
+
+// 发布
+FOnHealthChanged OnHealthChanged;
+OnHealthChanged.Broadcast(NewHealth);
+
+// 订阅
+Character-&gt;OnHealthChanged.AddUObject(this, &amp;UHUDWidget::UpdateHP);
+
+// 取消订阅（销毁时）
+Character-&gt;OnHealthChanged.RemoveAll(this);
+</code></pre>
+<ul>
+<li><strong><code>GameplayTag</code> 事件</strong>：<code>GetGameplayTagsComponent()-&gt;RegisterGameplayTagEvent()</code></li>
+</ul>
+<hr>
+<h3 id="19-状态-state"><a class="header" href="#19-状态-state">19. 状态 State</a></h3>
+<p><strong>原理与用途</strong><br>允许对象在<strong>内部状态改变时改变行为</strong>，消除大量 if/switch。用于角色状态机、AI状态、游戏流程控制。</p>
+<pre class="mermaid">classDiagram
+    class Character {
+        -CurrentState: IState
+        +SetState(IState)
+        +Update(float)
+    }
+    class IState {
+        +Update(float)*
+    }
+    class IdleState {
+        +Update(float)
+    }
+    class AttackState {
+        +Update(float)
+    }
+    class DeadState {
+        +Update(float)
+    }
+    Character o-- IState : current
+    IState &lt;|-- IdleState
+    IState &lt;|-- AttackState
+    IState &lt;|-- DeadState
+</pre>
+
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class IState { public: virtual void Update(float Dt) = 0; };
+
+class IdleState : public IState
+{
+public:
+    void Update(float Dt) override { /* 播放待机动画 */ }
+};
+
+class AttackState : public IState
+{
+public:
+    void Update(float Dt) override { /* 执行攻击逻辑 */ }
+};
+
+class Character
+{
+    IState* CurrentState = new IdleState();
+public:
+    void SetState(IState* NewState) { CurrentState = NewState; }
+    void Update(float Dt) { CurrentState-&gt;Update(Dt); }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong>动画蓝图状态机</strong>：最直观的状态模式应用，Idle → Run → Jump → Fall</li>
+<li><strong>GAS <code>GameplayTag</code> + <code>AbilityTask</code></strong>：Tag 标记当前状态，Ability 是状态的行为</li>
+<li><strong>AI <code>BehaviorTree</code></strong> 的选择器/序列节点也体现状态切换逻辑</li>
+</ul>
+<hr>
+<h3 id="20-策略-strategy"><a class="header" href="#20-策略-strategy">20. 策略 Strategy</a></h3>
+<p><strong>原理与用途</strong><br>定义一系列算法，<strong>使它们可以互相替换</strong>。用于运行时切换算法，如AI决策、寻路方式、伤害计算。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class IMovementStrategy { public: virtual void Move(AActor* Actor) = 0; };
+class WalkStrategy  : public IMovementStrategy { public: void Move(AActor* A) override {} };
+class FlyStrategy   : public IMovementStrategy { public: void Move(AActor* A) override {} };
+
+class Character
+{
+    IMovementStrategy* Strategy = new WalkStrategy();
+public:
+    void SetStrategy(IMovementStrategy* S) { Strategy = S; }
+    void Update(float Dt) { Strategy-&gt;Move(this); }
+};
+
+// 运行时切换
+Character.SetStrategy(new FlyStrategy());
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>UCharacterMovementComponent</code></strong> 可以替换为自定义移动组件，切换不同移动策略</li>
+<li><strong><code>UBTTask</code>（行为树任务）</strong>：不同 AI 使用不同 Task 组合，实现不同决策策略</li>
+<li><strong><code>UGameplayAbility</code> 的不同技能</strong>作为战斗策略互相替换</li>
+</ul>
+<hr>
+<h3 id="21-模板方法-template-method"><a class="header" href="#21-模板方法-template-method">21. 模板方法 Template Method</a></h3>
+<p><strong>原理与用途</strong><br>在父类定义<strong>算法骨架</strong>，将某些步骤的实现延迟到子类。用于框架定义流程，子类定制细节。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class Game
+{
+public:
+    // 模板方法：固定流程
+    void Run()
+    {
+        Initialize(); // 子类实现
+        while (!IsOver()) Update();
+        Shutdown();
+    }
+protected:
+    virtual void Initialize() = 0;
+    virtual void Update()     = 0;
+    virtual bool IsOver()     = 0;
+    virtual void Shutdown()   {}
+};
+
+class MyGame : public Game
+{
+    void Initialize() override { /* 加载资源 */ }
+    void Update()     override { /* 游戏逻辑 */ }
+    bool IsOver()     override { return false; }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>AActor</code> 生命周期虚函数</strong>是模板方法的典型：<code>BeginPlay</code> / <code>Tick</code> / <code>EndPlay</code>，引擎定义调用时机，游戏代码实现具体行为</li>
+<li><strong><code>AGameMode</code></strong> 的 <code>InitGame</code> / <code>PostLogin</code> / <code>HandleMatchHasEnded</code> 等回调</li>
+<li><strong><code>UUserWidget</code></strong> 的 <code>NativeConstruct</code> / <code>NativeTick</code> / <code>NativeDestruct</code></li>
+</ul>
+<hr>
+<h3 id="22-访问者-visitor"><a class="header" href="#22-访问者-visitor">22. 访问者 Visitor</a></h3>
+<p><strong>原理与用途</strong><br>在<strong>不改变类的前提下</strong>为其增加新操作。用于对一个对象结构中的元素执行多种不同操作，且操作频繁变化时。</p>
+<pre class="mermaid">classDiagram
+    class IVisitor {
+        +Visit(Circle)*
+        +Visit(Box)*
+    }
+    class AreaVisitor {
+        +Visit(Circle)
+        +Visit(Box)
+    }
+    class Circle {
+        +Accept(IVisitor)
+        +Radius: float
+    }
+    class Box {
+        +Accept(IVisitor)
+        +Side: float
+    }
+    IVisitor &lt;|-- AreaVisitor
+    Circle ..&gt; IVisitor : accept
+    Box ..&gt; IVisitor : accept
+</pre>
+
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">class Circle; class Box;
+
+class IVisitor
+{
+public:
+    virtual void Visit(Circle&amp; C) = 0;
+    virtual void Visit(Box&amp; B)    = 0;
+};
+
+class Circle { public: void Accept(IVisitor&amp; V) { V.Visit(*this); } float Radius; };
+class Box    { public: void Accept(IVisitor&amp; V) { V.Visit(*this); } float Side; };
+
+// 新增操作：不修改Circle/Box，只加新Visitor
+class AreaVisitor : public IVisitor
+{
+public:
+    void Visit(Circle&amp; C) override { float A = 3.14f * C.Radius * C.Radius; }
+    void Visit(Box&amp; B)    override { float A = B.Side * B.Side; }
+};
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>UGameplayEffect</code> 访问 <code>UAttributeSet</code></strong>：Effect 是访问者，Attribute 是被访问元素，不同 Effect 对属性执行不同操作</li>
+<li><strong>编辑器的 <code>FArchive</code> 序列化</strong>：Archive 作为访问者遍历对象树，执行序列化/反序列化/引用收集等操作</li>
+<li><strong><code>FExpressionVisitor</code>（材质图节点遍历）</strong></li>
+</ul>
+<hr>
+<h3 id="23-解释器-interpreter"><a class="header" href="#23-解释器-interpreter">23. 解释器 Interpreter</a></h3>
+<p><strong>原理与用途</strong><br>定义一个语言的<strong>文法</strong>，并提供解释器来处理该语言的句子。用于脚本系统、配置解析、DSL。</p>
+<p><strong>最简C++示例</strong></p>
+<pre><code class="language-cpp">// 表达式接口
+class IExpression { public: virtual int Evaluate() = 0; };
+
+class NumberExpr : public IExpression
+{
+    int Value;
+public:
+    NumberExpr(int V) : Value(V) {}
+    int Evaluate() override { return Value; }
+};
+
+class AddExpr : public IExpression
+{
+    IExpression *Left, *Right;
+public:
+    AddExpr(IExpression* L, IExpression* R) : Left(L), Right(R) {}
+    int Evaluate() override { return Left-&gt;Evaluate() + Right-&gt;Evaluate(); }
+};
+
+// 解释 "1 + 2 + 3"
+IExpression* Expr = new AddExpr(new AddExpr(new NumberExpr(1), new NumberExpr(2)), new NumberExpr(3));
+int Result = Expr-&gt;Evaluate(); // = 6
+</code></pre>
+<p><strong>UE中的应用</strong></p>
+<ul>
+<li><strong><code>GameplayTag</code> 匹配语法</strong>：<code>FGameplayTagQuery</code> 用类似语言的方式描述 Tag 匹配规则（Any/All/None）</li>
+<li><strong>蓝图虚拟机</strong>：蓝图节点图本质上是一种可视化语言，UE 的 VM 解释执行</li>
+<li><strong><code>ini</code> 配置解析</strong>：<code>GConfig-&gt;GetString()</code> 解析配置文件语法</li>
+</ul>
+<pre><code class="language-cpp">// GameplayTagQuery 作为解释器
+FGameplayTagQuery Query = FGameplayTagQuery::MakeQuery_MatchAnyTags(
+    FGameplayTagContainer::CreateFromArray({Tag_Burning, Tag_Frozen})
+);
+bool bMatch = Query.Matches(ActorTags);
+</code></pre>
+<hr>
+<h2 id="总结速查表"><a class="header" href="#总结速查表">总结速查表</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>类型</th><th>模式</th><th>一句话</th><th>UE对应</th></tr>
+</thead>
+<tbody>
+<tr><td>创建</td><td>单例</td><td>全局唯一实例</td><td><code>UGameInstanceSubsystem</code></td></tr>
+<tr><td>创建</td><td>工厂方法</td><td>子类决定创建哪个</td><td><code>SpawnActor</code> + <code>TSubclassOf</code></td></tr>
+<tr><td>创建</td><td>抽象工厂</td><td>创建一系列相关对象</td><td><code>DataAsset</code> + 工厂类</td></tr>
+<tr><td>创建</td><td>建造者</td><td>分步构建复杂对象</td><td><code>FActorSpawnParameters</code></td></tr>
+<tr><td>创建</td><td>原型</td><td>克隆现有对象</td><td><code>StaticDuplicateObject</code></td></tr>
+<tr><td>结构</td><td>适配器</td><td>转换接口</td><td><code>UInterface</code></td></tr>
+<tr><td>结构</td><td>桥接</td><td>抽象与实现分离</td><td>RHI 渲染接口</td></tr>
+<tr><td>结构</td><td>组合</td><td>树形统一接口</td><td><code>USceneComponent</code> 层级</td></tr>
+<tr><td>结构</td><td>装饰器</td><td>动态添加职责</td><td>动态挂载 <code>UActorComponent</code></td></tr>
+<tr><td>结构</td><td>外观</td><td>简化复杂子系统</td><td><code>UGameplayStatics</code></td></tr>
+<tr><td>结构</td><td>享元</td><td>共享细粒度对象</td><td><code>UStaticMesh</code> 共享、<code>FName</code></td></tr>
+<tr><td>结构</td><td>代理</td><td>控制对象访问</td><td><code>TSoftObjectPtr</code>、网络 RPC</td></tr>
+<tr><td>行为</td><td>责任链</td><td>请求沿链传递</td><td>Enhanced Input 优先级</td></tr>
+<tr><td>行为</td><td>命令</td><td>操作封装为对象</td><td><code>UGameplayAbility</code></td></tr>
+<tr><td>行为</td><td>迭代器</td><td>统一遍历集合</td><td><code>TActorIterator</code></td></tr>
+<tr><td>行为</td><td>中介者</td><td>中间人协调通信</td><td><code>AGameMode</code> / <code>AGameState</code></td></tr>
+<tr><td>行为</td><td>备忘录</td><td>捕获并恢复状态</td><td><code>USaveGame</code></td></tr>
+<tr><td>行为</td><td>观察者</td><td>一对多事件通知</td><td><code>Multicast Delegate</code></td></tr>
+<tr><td>行为</td><td>状态</td><td>状态决定行为</td><td>动画状态机、GAS Tag</td></tr>
+<tr><td>行为</td><td>策略</td><td>运行时替换算法</td><td><code>UCharacterMovementComponent</code></td></tr>
+<tr><td>行为</td><td>模板方法</td><td>父类定义流程骨架</td><td><code>BeginPlay</code> / <code>Tick</code></td></tr>
+<tr><td>行为</td><td>访问者</td><td>不改类增加操作</td><td><code>GameplayEffect</code> + <code>AttributeSet</code></td></tr>
+<tr><td>行为</td><td>解释器</td><td>解析自定义语言</td><td><code>GameplayTagQuery</code>、蓝图VM</td></tr>
+</tbody>
+</table>
+</div>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../gameDevelopment/GAS.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../gameDevelopment/UEcompile.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../gameDevelopment/GAS.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../gameDevelopment/UEcompile.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid-eefea253.min.js"></script>
+        <script src="../mermaid-init-ccf746f1.js"></script>
+
+
+
+    </div>
+    </body>
+</html>
